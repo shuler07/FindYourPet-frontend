@@ -1,8 +1,8 @@
 import "./Header.css";
 
-export default function Header({}) {
+export default function Header({ headerRef }) {
     return (
-        <div id="header">
+        <div id="header" className="atTheTop" ref={headerRef}>
             <HeaderLogo />
             <HeaderBar />
         </div>
@@ -12,7 +12,7 @@ export default function Header({}) {
 function HeaderLogo() {
     return (
         <a id="headerLogo" href="">
-            Find your pet
+            Find Your Pet
         </a>
     );
 }
@@ -20,32 +20,26 @@ function HeaderLogo() {
 function HeaderBar() {
     return (
         <div id="headerBar">
-            <HeaderButton
-                bColor="var(--primaryColor)"
-                bgColor="transparent"
-                tColor="var(--primaryColor)"
-                text="помощь"
-                action={() => console.log("help message")}
-            />
-            <HeaderButton
-                bColor="var(--containerColor)"
-                bgColor="var(--containerColor)"
-                tColor="var(--inverseColor)"
-                text="войти"
-                action={() => console.log("authentication")}
-            />
-        </div>
-    );
-}
-
-function HeaderButton({ bColor, bgColor, tColor, text, action }) {
-    return (
-        <div
-            className="headerButton"
-            style={{ border: `solid 1px ${bColor}`, background: bgColor }}
-            onClick={action}
-        >
-            <h6 style={{ color: tColor }}>{text}</h6>
+            <div
+                className="headerButton"
+                style={{
+                    border: `solid 2px var(--primary-color)`,
+                    background: "transparent",
+                }}
+                onClick={() => {}}
+            >
+                <h3 style={{ color: "var(--primary-color)" }}>помощь</h3>
+            </div>
+            <div
+                className="headerButton"
+                style={{
+                    border: `none`,
+                    background: "var(--primary-color)",
+                }}
+                onClick={() => {}}
+            >
+                <h6 style={{ color: "var(--main-color)" }}>войти</h6>
+            </div>
         </div>
     );
 }
