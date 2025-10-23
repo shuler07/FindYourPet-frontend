@@ -47,19 +47,17 @@ h6 {
 #root {
     min-height: 100dvh;
     position: relative;
-    background: linear-gradient(to bottom, #9baef3, #d37dd0);
+    background: linear-gradient(to right, #9baef3, #d37dd0);
 }
 
 .lightTheme {
-    /* Основной цвет - спокойный синий */
-    --primary-color: #4963c1; /* Для кнопки "Найти объявление", хидера */
-    --primary-light: #9baef3; /* Ховер-состояния */
-    --primary-dark: #0d2474; /* Активные состояния */
+    --primary-color: #5c45df;
+    --primary-light: #a0b4ff;
+    --primary-dark: #0c2067;
 
-    /* Акцентный цвет - теплый оранжевый */
-    --accent-color: #e34fdd; /* Для кнопки "Создать объявление", "Войти" */
-    --accent-light: #e892e5; /* Ховер-состояния */
-    --accent-dark: #7a1076; /* Активные состояния */
+    --accent-color: #e34fdd;
+    --accent-light: #e892e5;
+    --accent-dark: #b016aa;
     --main-color: white;
     --inverse-color: black;
 }

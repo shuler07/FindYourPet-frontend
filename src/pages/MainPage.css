@@ -9,7 +9,7 @@
     padding: 2rem;
     width: calc(100% - 4rem);
     height: 100dvh;
-    background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.4) 50%), url("https://images.unsplash.com/photo-1552053831-71594a27632d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2012&q=80")
+    background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.4) 50%), url("https://images.unsplash.com/photo-1552053831-71594a27632d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2012&q=80")
     center+30%/cover;
     display: flex;
     gap: 2rem;
@@ -17,10 +17,6 @@
     justify-content: center;
     align-items: center;
     mask-image: linear-gradient(to bottom, white 80%, transparent);
-}
-#mainPageIntroSection.atTheTop {
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(255, 255, 255, 0.4) 50%), url("https://images.unsplash.com/photo-1552053831-71594a27632d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2012&q=80")
-    center+30%/cover;
 }
 
 #mainPageIntroSection > h1 {
@@ -35,13 +31,13 @@
 }
 
 .mainPageIntroButton {
-    padding: 1rem 2rem;
+    padding: .75rem 1.5rem;
     border-radius: 2rem;
-    box-shadow: 0px 8px 20px color-mix(in srgb, var(--inverse-color), transparent 70%);
+    box-shadow: 0px 4px 20px color-mix(in srgb, var(--inverse-color), transparent 50%);
     cursor: pointer;
 }
 
-.mainPageIntroButton > h5 {
+.mainPageIntroButton > h2 {
     color: var(--main-color);
 }
 
@@ -56,5 +52,9 @@
     #mainPageIntroButtonsContainer {
         flex-direction: column;
         gap: 1rem;
+    }
+
+    .mainPageIntroButton {
+        padding: 1rem 2rem;
     }
 }
