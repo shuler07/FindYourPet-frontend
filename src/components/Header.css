@@ -9,7 +9,7 @@
     align-items: center;
     border-radius: 1.5rem;
     z-index: 1;
-    background: #ccd7ff66;
+    background: color-mix(in srgb, var(--main-color), transparent 70%);
     backdrop-filter: blur(10px);
     transition: all .25s ease;
 }
@@ -19,11 +19,8 @@
 }
 
 #headerLogo {
-    font-size: 1.8em;
-    font-weight: 700;
-    color: var(--primary-dark);
-    text-decoration: none;
-    transition: all .25s ease;
+    height: 100%;
+    cursor: pointer;
 }
 
 #headerBar {
@@ -35,4 +32,26 @@
     padding: .5rem 1.5rem;
     border-radius: 1.5rem;
     cursor: pointer;
+    transition: all .5s ease;
+}
+.headerButton.primary {
+    border: none;
+    background: var(--primary-color);
+}
+.headerButton.primary > h6 {
+    color: var(--main-color);
+}
+.headerButton.accent {
+    border: solid 2px var(--primary-color);
+    background: transparent;
+}
+.headerButton.accent > h3 {
+    color: var(--primary-color);
+}
+
+.headerButton.primary:hover {
+    background: var(--primary-light);
+}
+.headerButton.accent:hover {
+    background: color-mix(in srgb, var(--primary-light), transparent 60%);
 }

@@ -1,44 +1,42 @@
 import "./Header.css";
 
+import { useContext } from "react";
+import { AppContext } from "../App";
+
+import { useNavigate } from "react-router-dom";
+
 export default function Header({ headerRef }) {
+    const { signedIn } = useContext(AppContext);
+
+    const navigate = useNavigate();
+
     return (
         <div id="header" className="atTheTop" ref={headerRef}>
-            <HeaderLogo />
-            <HeaderBar />
+            <img
+                id="headerLogo"
+                src="./images/logo.png"
+                onClick={() => navigate("/")}
+            />
+            <HeaderBar signedIn={signedIn} />
         </div>
     );
 }
 
-function HeaderLogo() {
-    return (
-        <a id="headerLogo" href="">
-            Find Your Pet
-        </a>
-    );
-}
+function HeaderBar({ signedIn }) {
+    const navigate = useNavigate();
 
-function HeaderBar() {
     return (
         <div id="headerBar">
-            <div
-                className="headerButton"
-                style={{
-                    border: `solid 2px var(--primary-color)`,
-                    background: "transparent",
-                }}
-                onClick={() => {}}
-            >
-                <h3 style={{ color: "var(--primary-color)" }}>помощь</h3>
+            <div className="headerButton accent" onClick={() => {}}>
+                <h3>помощь</h3>
             </div>
             <div
-                className="headerButton"
-                style={{
-                    border: `none`,
-                    background: "var(--primary-color)",
+                className="headerButton primary"
+                onClick={() => {
+                    signedIn ? navigate("/profile") : navigate("/signin");
                 }}
-                onClick={() => {}}
             >
-                <h6 style={{ color: "var(--main-color)" }}>войти</h6>
+                <h6>{signedIn ? "профиль" : "войти"}</h6>
             </div>
         </div>
     );
