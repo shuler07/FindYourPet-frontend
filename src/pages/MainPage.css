@@ -9,7 +9,7 @@
     padding: 2rem;
     width: calc(100% - 4rem);
     height: 100dvh;
-    background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.4) 50%), url("https://images.unsplash.com/photo-1552053831-71594a27632d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2012&q=80")
+    background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.3) 50%), url("https://images.unsplash.com/photo-1552053831-71594a27632d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2012&q=80")
     center+30%/cover;
     display: flex;
     gap: 2rem;
@@ -21,7 +21,6 @@
 
 #mainPageIntroSection > h1 {
     font-size: max(3em, 6dvw);
-    color: var(--main-color);
 }
 
 #mainPageIntroButtonsContainer {
