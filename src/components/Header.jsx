@@ -2,7 +2,6 @@ import "./Header.css";
 
 import { useContext } from "react";
 import { AppContext } from "../App";
-
 import { useNavigate } from "react-router-dom";
 
 export default function Header() {
@@ -15,7 +14,7 @@ export default function Header() {
             <img
                 id="headerLogo"
                 src="./images/logo.png"
-                onClick={() => navigate("/")}
+                onClick={() => navigate('/')}
             />
             <HeaderBar signedIn={signedIn} />
         </div>
@@ -27,7 +26,10 @@ function HeaderBar({ signedIn }) {
 
     return (
         <div id="headerBar">
-            <div className="headerButton accent" onClick={() => {}}>
+            <div
+                className="headerButton accent"
+                onClick={() => navigate("/help")}
+            >
                 <h3>помощь</h3>
             </div>
             <div

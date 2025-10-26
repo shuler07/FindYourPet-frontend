@@ -18,9 +18,13 @@
     cursor: pointer;
 }
 
-#signin-back img {
-    width: 1rem;
-    height: 1rem;
+#signin-back > img {
+    width: 1.5rem;
+    height: 1.5rem;
+    transition: all .5s ease;
+}
+#signin-back:hover > img {
+    translate: -2px 0;
 }
 
 #signin-back h6 {
@@ -48,6 +52,20 @@
     border-top-left-radius: 2rem;
     border-bottom-left-radius: 2rem;
     contain: paint;
+}
+
+#left-form h1 {animation: left-form-text-appear 1s forwards;}
+#left-form h2 {animation: left-form-text-appear 1s .1s forwards;}
+#left-form h6 {animation: left-form-text-appear 1s .2s forwards;}
+
+@keyframes left-form-text-appear {
+    0% {
+        translate: 0 10px;
+    }
+    100% {
+        opacity: 1;
+        translate: 0 0;
+    }
 }
 
 #left-form::before {
@@ -81,7 +99,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
     background: var(--main-color);
     border-top-right-radius: 2rem;
     border-bottom-right-radius: 2rem;
@@ -97,6 +115,35 @@
     background: linear-gradient(to right, var(--primary-light), var(--accent-light));
     border-radius: 1.5rem;
     box-shadow: 0px 5px 20px #00000030;
+}
+
+.right-form-toogle-button {
+    padding: .5rem 1rem;
+    width: calc(50% - 2rem);
+    background: none;
+    border: none;
+    z-index: 1;
+    transition: all .5s ease;
+}
+.right-form-toogle-button:not(.active) {
+    cursor: pointer;
+}
+
+.right-form-toogle-button > h3 {
+    text-align: center;
+    color: white;
+}
+
+#right-form-active-button {
+    position: absolute;
+    width: 50%;
+    height: calc(100% - 1rem);
+    background: var(--primary-color);
+    border-radius: 1rem;
+    transition: all .25s ease;
+}
+#right-form-active-button.register {
+    translate: calc(100% - 1rem) 0;
 }
 
 #right-form-fields {
@@ -118,31 +165,59 @@
     }
 }
 
-#right-form-active-button {
-    position: absolute;
-    width: 50%;
-    height: calc(100% - 1rem);
+#auth-button {
+    padding: .5rem 2rem;
+    width: max(60%, 12rem);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .5rem;
     background: var(--primary-color);
     border-radius: 1rem;
-    transition: all .25s ease;
-}
-#right-form-active-button.register {
-    translate: calc(100% - 1rem) 0;
-}
-
-.right-form-toogle-button {
-    padding: .5rem 1rem;
-    width: calc(50% - 2rem);
-    background: none;
-    border: none;
-    z-index: 1;
     cursor: pointer;
     transition: all .5s ease;
 }
+#auth-button:hover {
+    background: var(--primary-light);
+}
 
-.right-form-toogle-button > h3 {
-    text-align: center;
+#auth-button > h3 {
     color: white;
+}
+
+#auth-button img {
+    width: 1.5rem;
+    height: 1.5rem;
+    transition: all .5s ease;
+}
+#auth-button:hover img {
+    translate: 2px 0;
+}
+
+#forget-password-button {
+    margin-top: -.5rem;
+    position: relative;
+    cursor: pointer;
+}
+#forget-password-button::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    width: 100%;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--primary-color);
+    translate: 0 1px;
+    opacity: 0;
+    transition: all .25s ease;
+}
+#forget-password-button:hover::after {
+    translate: 0 0;
+    opacity: 1;
+}
+
+#forget-password-button > h3 {
+    color: var(--primary-color);
 }
 
 

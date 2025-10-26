@@ -62,6 +62,15 @@ h6 {
 }
 
 .darkTheme {
+    --primary-color: #5c45df;
+    --primary-light: #6f86df;
+
+    --accent-color: #c145df;
+    --accent-light: #d66fdf;
+
+    --main-color: #f8f8f8;
+    --secondary-color: #eee;
+    --inverse-color: black;
 }
 
 @media (max-width: 768px) {
