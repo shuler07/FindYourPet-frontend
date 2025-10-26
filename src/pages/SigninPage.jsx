@@ -24,9 +24,9 @@ export default function SigninPage() {
             <div id="signin-form">
                 <BackButton />
                 <div id="left-form">
-                    <h1>Find Your Pet</h1>
-                    <h2>Найди своего питомца</h2>
-                    <h6>
+                    <h1 style={{ color: 'white' }}>Find Your Pet</h1>
+                    <h2 style={{ color: 'white' }}>Найди своего питомца</h2>
+                    <h6 style={{ color: 'white' }}>
                         Присоединяйтесь к нашему сообществу, чтобы помочь
                         животным обрести дом или найти своих потерянных
                         любимцев.

@@ -17,7 +17,7 @@ h4,
 h5,
 h6 {
     margin: 0;
-    color: var(--main-color);
+    color: var(--inverse-color);
 }
 h1 {
     font-size: 2em;
@@ -47,19 +47,17 @@ h6 {
 #root {
     min-height: 100dvh;
     position: relative;
-    background: linear-gradient(to right, #9baef3, #d37dd0);
 }
 
 .lightTheme {
     --primary-color: #5c45df;
     --primary-light: #6f86df;
-    --primary-dark: #0c2067;
 
-    --accent-color: #e34fdd;
-    --accent-light: #e892e5;
-    --accent-dark: #b016aa;
+    --accent-color: #c145df;
+    --accent-light: #d66fdf;
 
-    --main-color: white;
+    --main-color: #f8f8f8;
+    --secondary-color: #eee;
     --inverse-color: black;
 }
 

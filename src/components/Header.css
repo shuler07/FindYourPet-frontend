@@ -1,26 +1,21 @@
 #header {
-    margin-top: 1rem;
-    padding: .5rem 2rem;
-    width: calc(100% - 6rem);
+    padding: 1rem 2rem;
+    width: calc(100% - 4rem);
     height: 3rem;
     position: fixed;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 1.5rem;
     z-index: 1;
-    background: color-mix(in srgb, var(--main-color), transparent 70%);
-    backdrop-filter: blur(10px);
+    background: var(--main-color);
+    box-shadow: 0px 2px 4px #00000010;
     transition: all .25s ease;
-}
-#header.atTheTop {
-    background: none;
-    backdrop-filter: none;
 }
 
 #headerLogo {
     height: 100%;
     cursor: pointer;
+    filter: invert(1);
 }
 
 #headerBar {
