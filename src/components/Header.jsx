@@ -5,13 +5,13 @@ import { AppContext } from "../App";
 
 import { useNavigate } from "react-router-dom";
 
-export default function Header({ headerRef }) {
+export default function Header() {
     const { signedIn } = useContext(AppContext);
 
     const navigate = useNavigate();
 
     return (
-        <div id="header" className="atTheTop" ref={headerRef}>
+        <div id="header">
             <img
                 id="headerLogo"
                 src="./images/logo.png"
