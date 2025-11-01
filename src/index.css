@@ -73,6 +73,35 @@ h6 {
     --inverse-color: black;
 }
 
+
+
+.primary-button {
+    padding: .5rem 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .5rem;
+    background: var(--primary-color);
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all .5s ease;
+}
+.primary-button:hover:not(:disabled) {background: var(--primary-light);}
+
+.primary-button > h3 {color: white;}
+
+.primary-button img {
+    width: 1.5rem;
+    height: 1.5rem;
+    transition: all .5s ease;
+}
+.primary-button:hover:not(:disabled) img {
+    translate: 2px 0;
+}
+
+
+
 @media (max-width: 768px) {
     html {
         font-size: 75%;

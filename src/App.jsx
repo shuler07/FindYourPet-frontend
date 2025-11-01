@@ -9,12 +9,12 @@ import CreateAdPage from "./pages/CreateAdPage";
 import SearchAdsPage from "./pages/SearchAdsPage";
 import AuthorsPage from "./pages/AuthorsPage";
 
-import { BASE_PATHNAME, API_PATHS, DEBUG } from "./data";
+import { API_PATHS, DEBUG } from "./data";
 
 export const AppContext = createContext();
 
 export default function App() {
-    const [signedIn, setSignedIn] = useState(false);
+    const [signedIn, setSignedIn] = useState(true);
     // useEffect(() => {
     //     CheckAuth();
     // }, []);
@@ -28,7 +28,7 @@ export default function App() {
             });
 
             const data = await response.json();
-            if (DEBUG) console.log("Authentication. Data received:", data);
+            if (DEBUG) console.debug("Authentication. Data received:", data);
         } catch (error) {
             console.error("Authentication. Error occured:", error);
         }
@@ -36,7 +36,7 @@ export default function App() {
 
     return (
         <AppContext.Provider value={{ signedIn, setSignedIn }}>
-            <Router basename={BASE_PATHNAME}>
+            <Router>
                 <Routes>
                     <Route index element={<MainPage />} />
                     <Route path="/signin" element={<SigninPage />} />

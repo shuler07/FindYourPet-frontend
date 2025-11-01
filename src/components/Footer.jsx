@@ -8,7 +8,7 @@ export default function Footer() {
     return (
         <div id="footer">
             <h6 style={{ color: "#eee" }}>
-                © 2025 FindYourPet. Все права защищены.Сделано с любовью к
+                © 2025 FindYourPet. Все права защищены. Сделано с любовью к
                 питомцам{" "}
                 <a id="authors-link" onClick={() => navigate("/authors")}>
                     студентами университета МАИ

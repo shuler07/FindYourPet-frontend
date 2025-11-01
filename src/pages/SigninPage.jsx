@@ -45,7 +45,7 @@ export default function SigninPage() {
             });
 
             const data = await response.json();
-            if (DEBUG) console.log("Registering. Data received:", data);
+            if (DEBUG) console.debug("Registering. Data received:", data);
         } catch (error) {
             console.error("Registering. Error occured:", error);
         }
@@ -66,7 +66,7 @@ export default function SigninPage() {
             });
 
             const data = await response.json();
-            if (DEBUG) console.log("Logining. Data received:", data);
+            if (DEBUG) console.debug("Logining. Data received:", data);
         } catch (error) {
             console.error("Logining. Error occured:", error);
         }
@@ -77,8 +77,12 @@ export default function SigninPage() {
             <div id="signin-form">
                 <BackButton />
                 <div id="left-form">
-                    <h1 style={{ color: "white", opacity: 0 }}>Find Your Pet</h1>
-                    <h2 style={{ color: "white", opacity: 0 }}>Найди своего питомца</h2>
+                    <h1 style={{ color: "white", opacity: 0 }}>
+                        Find Your Pet
+                    </h1>
+                    <h2 style={{ color: "white", opacity: 0 }}>
+                        Найди своего питомца
+                    </h2>
                     <h6 style={{ color: "white", opacity: 0 }}>
                         Присоединяйтесь к нашему сообществу, чтобы помочь
                         животным обрести дом или найти своих потерянных
@@ -98,6 +102,11 @@ export default function SigninPage() {
                             autoComplete="email"
                             label="Почта"
                             ref={emailInputRef}
+                            value={
+                                emailInputRef.current
+                                    ? emailInputRef.current.value
+                                    : ""
+                            }
                         />
                         <InputLabeled
                             inputId="password-field"
@@ -106,6 +115,11 @@ export default function SigninPage() {
                             autoComplete="current-password"
                             label="Пароль"
                             ref={passwordInputRef}
+                            value={
+                                passwordInputRef.current
+                                    ? passwordInputRef.current.value
+                                    : ""
+                            }
                         />
                         {isRegister && (
                             <InputLabeled
@@ -115,6 +129,11 @@ export default function SigninPage() {
                                 autoComplete="new-password"
                                 label="Подтвердите пароль"
                                 ref={confirmPasswordRef}
+                                value={
+                                    confirmPasswordRef.current
+                                        ? confirmPasswordRef.current.value
+                                        : ""
+                                }
                             />
                         )}
                     </div>
@@ -134,7 +153,7 @@ function BackButton() {
 
     return (
         <div id="signin-back" onClick={() => navigate("/")}>
-            <img src="./icons/left-arrow.svg" />
+            <img src="/icons/left-arrow.svg" />
             <h6>На главную</h6>
         </div>
     );
@@ -169,10 +188,10 @@ function RightFormToogleContainer({ isRegister, setIsRegister }) {
 
 function AuthButton({ isRegister, event }) {
     return (
-        <div id="auth-button" onClick={event}>
+        <button id="auth-button" className="primary-button" onClick={event}>
             <h3>{isRegister ? "Зарегистрироваться" : "Войти"}</h3>
-            <img src="./icons/right-arrow.svg" />
-        </div>
+            <img src="/icons/right-arrow.svg" />
+        </button>
     );
 }
 

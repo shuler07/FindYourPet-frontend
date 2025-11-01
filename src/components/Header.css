@@ -12,41 +12,41 @@
     transition: all .25s ease;
 }
 
-#headerLogo {
+#header-logo {
     height: 100%;
     cursor: pointer;
     filter: invert(1);
 }
 
-#headerBar {
+#header-bar {
     display: flex;
     gap: 1rem;
 }
 
-.headerButton {
+.header-button {
     padding: .5rem 1.5rem;
     border-radius: 1.5rem;
     cursor: pointer;
     transition: all .5s ease;
 }
-.headerButton.primary {
+.header-button.primary {
     border: none;
     background: var(--primary-color);
 }
-.headerButton.primary > h6 {
+.header-button.primary > h6 {
     color: var(--main-color);
 }
-.headerButton.accent {
+.header-button.accent {
     border: solid 2px var(--primary-color);
     background: transparent;
 }
-.headerButton.accent > h3 {
+.header-button.accent > h3 {
     color: var(--primary-color);
 }
 
-.headerButton.primary:hover {
+.header-button.primary:hover {
     background: var(--primary-light);
 }
-.headerButton.accent:hover {
+.header-button.accent:hover {
     background: color-mix(in srgb, var(--primary-light), transparent 60%);
 }

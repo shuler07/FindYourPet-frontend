@@ -165,34 +165,7 @@
     }
 }
 
-#auth-button {
-    padding: .5rem 2rem;
-    width: max(60%, 12rem);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: .5rem;
-    background: var(--primary-color);
-    border-radius: 1rem;
-    cursor: pointer;
-    transition: all .5s ease;
-}
-#auth-button:hover {
-    background: var(--primary-light);
-}
-
-#auth-button > h3 {
-    color: white;
-}
-
-#auth-button img {
-    width: 1.5rem;
-    height: 1.5rem;
-    transition: all .5s ease;
-}
-#auth-button:hover img {
-    translate: 2px 0;
-}
+#auth-button {width: max(60%, 12rem);}
 
 #forget-password-button {
     margin-top: -.5rem;
@@ -239,4 +212,6 @@
         border-top-right-radius: 0;
         border-bottom-left-radius: 2rem;
     }
+
+    #auth-button {width: 80%;}
 }

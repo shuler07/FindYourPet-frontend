@@ -1,7 +1,9 @@
 #footer {
     padding: 1rem 2rem;
     width: calc(100% - 4rem);
+    height: 2rem;
     display: flex;
+    justify-content: center;
     flex-direction: column;
     gap: .5rem;
     align-items: center;

@@ -27,61 +27,73 @@ export default function MainPage() {
     };
 
     return (
-        <div id="main-page-container">
+        <>
             <Header />
-            <section id="main-page-intro-section">
-                <h1>Find Your Pet</h1>
-                <h2 style={{ textAlign: "center" }}>
-                    Присоединяйся к нашему сообществу: ищи потерянных животных в
-                    своей области или сообщай об их находке.
-                </h2>
-            </section>
-            <section id="main-page-navigate-section">
-                <div className="navigate-banner" onClick={handleClickCreateAd}>
-                    <img src="./icons/plus-square.svg" />
-                    <h2>Создать объявление</h2>
-                    <h6>Разместите объявление о пропавшем питомце</h6>
-                </div>
-                <div className="navigate-banner" onClick={handleClickSearchAds}>
-                    <img src="./icons/search-ad.svg" />
-                    <h2>Найти объявление</h2>
-                    <h6>Найдите пропавших животных в вашем районе</h6>
-                </div>
-            </section>
-            <h2>О сервисе</h2>
-            <section id="main-page-about-section">
-                <div className="about-block">
-                    <img src="./icons/house-check.svg" />
-                    <div>
-                        <h6>Животных возвращено</h6>
-                        <h3 style={{ textAlign: "center" }}>{animalsBack}</h3>
+            <div id="main-page-container">
+                <section id="main-page-intro-section">
+                    <h1>Find Your Pet</h1>
+                    <h2 style={{ textAlign: "center" }}>
+                        Присоединяйся к нашему сообществу: ищи потерянных
+                        животных в своей области или сообщай об их находке.
+                    </h2>
+                </section>
+                <section id="main-page-navigate-section">
+                    <div
+                        className="navigate-banner"
+                        onClick={handleClickCreateAd}
+                    >
+                        <img src="/icons/plus-square.svg" />
+                        <h2>Создать объявление</h2>
+                        <h6>Разместите объявление о пропавшем питомце</h6>
                     </div>
-                </div>
-                <div className="about-block">
-                    <img src="./icons/search.svg" />
-                    <div>
-                        <h6>Активных объявлений</h6>
-                        <h3 style={{ textAlign: "center" }}>{activeAds}</h3>
+                    <div
+                        className="navigate-banner"
+                        onClick={handleClickSearchAds}
+                    >
+                        <img src="/icons/search-ad.svg" />
+                        <h2>Найти объявление</h2>
+                        <h6>Найдите пропавших животных в вашем районе</h6>
                     </div>
-                </div>
-                <div className="about-block">
-                    <img src="./icons/community.svg" />
-                    <div>
-                        <h6>Сообщество</h6>
-                        <h3 style={{ textAlign: "center" }}>
-                            {communityMembers} чел.
-                        </h3>
+                </section>
+                <h2>О сервисе</h2>
+                <section id="main-page-about-section">
+                    <div className="about-block">
+                        <img src="/icons/house-check.svg" />
+                        <div>
+                            <h6>Животных возвращено</h6>
+                            <h3 style={{ textAlign: "center" }}>
+                                {animalsBack}
+                            </h3>
+                        </div>
                     </div>
-                </div>
-                <div className="about-block">
-                    <img src="./icons/heart.svg" />
-                    <div>
-                        <h6>Процент нахождения</h6>
-                        <h3 style={{ textAlign: "center" }}>{successRate} %</h3>
+                    <div className="about-block">
+                        <img src="/icons/search.svg" />
+                        <div>
+                            <h6>Активных объявлений</h6>
+                            <h3 style={{ textAlign: "center" }}>{activeAds}</h3>
+                        </div>
                     </div>
-                </div>
-            </section>
+                    <div className="about-block">
+                        <img src="/icons/community.svg" />
+                        <div>
+                            <h6>Сообщество</h6>
+                            <h3 style={{ textAlign: "center" }}>
+                                {communityMembers} чел.
+                            </h3>
+                        </div>
+                    </div>
+                    <div className="about-block">
+                        <img src="/icons/heart.svg" />
+                        <div>
+                            <h6>Процент нахождения</h6>
+                            <h3 style={{ textAlign: "center" }}>
+                                {successRate} %
+                            </h3>
+                        </div>
+                    </div>
+                </section>
+            </div>
             <Footer />
-        </div>
+        </>
     );
 }

@@ -1,4 +1,6 @@
 #main-page-container {
+    padding-top: 5rem;
+    padding-bottom: 2rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -7,7 +9,6 @@
 }
 
 #main-page-intro-section {
-    margin-top: 5rem;
     padding: 4rem;
     width: calc(100% - 8rem);
     height: 60dvh;
@@ -26,7 +27,6 @@
 }
 
 #main-page-navigate-section {
-    margin: 0 4rem;
     width: calc(100% - 8rem);
     display: flex;
     gap: 1rem;
@@ -56,7 +56,6 @@
 }
 
 #main-page-about-section {
-    margin: 0 4rem;
     width: calc(100% - 8rem);
     display: flex;
     gap: 1rem;

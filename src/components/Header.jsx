@@ -12,8 +12,8 @@ export default function Header() {
     return (
         <div id="header">
             <img
-                id="headerLogo"
-                src="./images/logo.png"
+                id="header-logo"
+                src="/images/logo.png"
                 onClick={() => navigate('/')}
             />
             <HeaderBar signedIn={signedIn} />
@@ -25,15 +25,15 @@ function HeaderBar({ signedIn }) {
     const navigate = useNavigate();
 
     return (
-        <div id="headerBar">
+        <div id="header-bar">
             <div
-                className="headerButton accent"
+                className="header-button accent"
                 onClick={() => navigate("/help")}
             >
                 <h3>помощь</h3>
             </div>
             <div
-                className="headerButton primary"
+                className="header-button primary"
                 onClick={() => {
                     signedIn ? navigate("/profile") : navigate("/signin");
                 }}

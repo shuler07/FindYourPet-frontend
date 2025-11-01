@@ -1,3 +1,4 @@
+import { useState } from "react";
 import "./InputLabeled.css";
 
 export default function InputLabeled({
@@ -7,7 +8,10 @@ export default function InputLabeled({
     autoComplete,
     label,
     ref,
+    value
 }) {
+    const [text, setText] = useState(value);
+
     return (
         <div className="input-labeled">
             <label htmlFor={inputId}>{label}</label>
@@ -17,6 +21,8 @@ export default function InputLabeled({
                 placeholder={placeholder}
                 autoComplete={autoComplete}
                 ref={ref}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
             />
         </div>
     );
