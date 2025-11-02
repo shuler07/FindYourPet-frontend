@@ -6,7 +6,7 @@ export default function Footer() {
     const navigate = useNavigate();
 
     return (
-        <div id="footer">
+        <footer>
             <h6 style={{ color: "#eee" }}>
                 © 2025 FindYourPet. Все права защищены. Сделано с любовью к
                 питомцам{" "}
@@ -15,6 +15,6 @@ export default function Footer() {
                 </a>{" "}
                 ✈️
             </h6>
-        </div>
+        </footer>
     );
 }

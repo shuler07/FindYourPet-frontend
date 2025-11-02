@@ -61,34 +61,28 @@ export default function MainPage() {
                         <img src="/icons/house-check.svg" />
                         <div>
                             <h6>Животных возвращено</h6>
-                            <h3 style={{ textAlign: "center" }}>
-                                {animalsBack}
-                            </h3>
+                            <h3>{animalsBack}</h3>
                         </div>
                     </div>
                     <div className="about-block">
                         <img src="/icons/search.svg" />
                         <div>
                             <h6>Активных объявлений</h6>
-                            <h3 style={{ textAlign: "center" }}>{activeAds}</h3>
+                            <h3>{activeAds}</h3>
                         </div>
                     </div>
                     <div className="about-block">
                         <img src="/icons/community.svg" />
                         <div>
                             <h6>Сообщество</h6>
-                            <h3 style={{ textAlign: "center" }}>
-                                {communityMembers} чел.
-                            </h3>
+                            <h3>{communityMembers} чел.</h3>
                         </div>
                     </div>
                     <div className="about-block">
                         <img src="/icons/heart.svg" />
                         <div>
                             <h6>Процент нахождения</h6>
-                            <h3 style={{ textAlign: "center" }}>
-                                {successRate} %
-                            </h3>
+                            <h3>{successRate} %</h3>
                         </div>
                     </div>
                 </section>

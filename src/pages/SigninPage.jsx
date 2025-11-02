@@ -20,19 +20,35 @@ export default function SigninPage() {
     const confirmPasswordRef = useRef();
 
     const credsValid = (email, password, confirm_password) => {
-        if (email == "") return false;
-        if (password.length < 8) return false;
-        if (confirm_password != null && password != confirm_password)
-            return false;
-        return true;
+        let flag = true;
+
+        if (email == "") {
+            flag = false;
+            emailInputRef.current.classList.add("wrong-field");
+        }
+        if (password.length < 8) {
+            flag = false;
+            passwordInputRef.current.classList.add("wrong-field");
+        }
+        if (
+            confirm_password != null &&
+            (confirm_password.length < 8 || password != confirm_password)
+        ) {
+            flag = false;
+            confirmPasswordRef.current.classList.add("wrong-field");
+        }
+
+        return flag;
     };
 
-    const authenticateUser = () => (isRegister ? RegisterUser() : LoginUser());
+    const authenticateUser = () => {
+        isRegister ? RegisterUser() : LoginUser();
+    };
 
     async function RegisterUser() {
-        const email = emailInputRef.current.value,
-            password = passwordInputRef.current.value,
-            confirm_password = confirmPasswordRef.current.value;
+        const email = emailInputRef.current.value;
+        const password = passwordInputRef.current.value;
+        const confirm_password = confirmPasswordRef.current.value;
 
         if (!credsValid(email, password, confirm_password)) return;
 
@@ -52,8 +68,8 @@ export default function SigninPage() {
     }
 
     async function LoginUser() {
-        const email = emailInputRef.current.value,
-            password = passwordInputRef.current.value;
+        const email = emailInputRef.current.value;
+        const password = passwordInputRef.current.value;
 
         if (!credsValid(email, password, null)) return;
 
@@ -74,7 +90,7 @@ export default function SigninPage() {
 
     return (
         <div id="signin-page-container">
-            <div id="signin-form">
+            <form id="signin-form">
                 <BackButton />
                 <div id="left-form">
                     <h1 style={{ color: "white", opacity: 0 }}>
@@ -143,7 +159,7 @@ export default function SigninPage() {
                     />
                     {!isRegister && <ForgetPasswordButton />}
                 </div>
-            </div>
+            </form>
         </div>
     );
 }
@@ -188,7 +204,12 @@ function RightFormToogleContainer({ isRegister, setIsRegister }) {
 
 function AuthButton({ isRegister, event }) {
     return (
-        <button id="auth-button" className="primary-button" onClick={event}>
+        <button
+            id="auth-button"
+            className="primary-button"
+            type="button"
+            onClick={event}
+        >
             <h3>{isRegister ? "Зарегистрироваться" : "Войти"}</h3>
             <img src="/icons/right-arrow.svg" />
         </button>

@@ -39,6 +39,7 @@
 }
 
 .stage > h6 {
+    text-align: center;
     color: var(--inverse-color);
     transition: color .5s ease;
 }
@@ -104,5 +105,9 @@
 @media (max-width: 768px) {
     #ad-container {
         width: calc(100% - 4rem);
+    }
+
+    #stages-container {
+        gap: 1rem;
     }
 }

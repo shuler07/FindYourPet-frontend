@@ -33,35 +33,34 @@ export default function CreateAdPage() {
     });
 
     const ProcessNavigationButtonClick = (delta) => {
+        if (delta == -1) {
+            setActiveStage((prev) => prev - 1);
+            return;
+        }
+
+        if (!validateFieldsFunc.current()) return;
+
         if (activeStage != 3) {
-            // Updating ad and stage
-            if (delta == 1 && validateFieldsFunc.current()) {
-                applyFieldsFunc.current();
-                setActiveStage((prev) => prev + delta);
-            } else if (delta == -1) {
-                setActiveStage((prev) => prev + delta);
-            }
-        } else {
-            // Sengins ad data to server
-            CreateAd();
-        };
+            applyFieldsFunc.current();
+            setActiveStage((prev) => prev + 1);
+        } else CreateAd();
     };
 
     async function CreateAd() {
         try {
             const response = await fetch(API_PATHS.create_ad, {
-                method: 'POST',
-                credentials: 'include',
+                method: "POST",
+                credentials: "include",
                 body: JSON.stringify(adDetails.current),
-                headers: { 'Content-Type':'application/json' }
+                headers: { "Content-Type": "application/json" },
             });
 
             const data = await response.json();
-            if (DEBUG) console.debug('Creating ad. Data received:', data);
+            if (DEBUG) console.debug("Creating ad. Data received:", data);
         } catch (error) {
-            console.error('Creating ad. Error occured:', error);
-        };
-    };
+            console.error("Creating ad. Error occured:", error);
+        }
+    }
 
     return (
         <>
@@ -79,7 +78,9 @@ export default function CreateAdPage() {
                     <StageNavigationContainer
                         backDisabled={activeStage == 0}
                         lastRenamed={activeStage == 3}
-                        processNavigationButtonClick={ProcessNavigationButtonClick}
+                        processNavigationButtonClick={
+                            ProcessNavigationButtonClick
+                        }
                     />
                 </div>
             </div>
@@ -208,7 +209,7 @@ function PetInformationFields({ validate, apply, adDetails }) {
         let flag = true;
 
         Object.entries(refs).forEach((value) => {
-            if (!['distincts', 'nickname'].includes(value[0])) {
+            if (!["distincts", "nickname"].includes(value[0])) {
                 const elem = value[1].current;
                 if (elem.value == "") {
                     elem.classList.add("wrong-field");
@@ -333,7 +334,7 @@ function LocationFields({ validate, apply, adDetails }) {
         adDetails.current = {
             ...adDetails.current,
             location: refs.location.current.value,
-            geoLocation: '',
+            geoLocation: "",
             time: refs.time.current.value,
         };
     };
@@ -374,7 +375,7 @@ function ContactFields({ validate, apply, adDetails }) {
         let flag = true;
 
         Object.entries(refs).forEach((value) => {
-            if (value[0] != 'extras') {
+            if (value[0] != "extras") {
                 const elem = value[1].current;
                 if (elem.value == "") {
                     elem.classList.add("wrong-field");

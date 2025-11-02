@@ -10,14 +10,14 @@ export default function Header() {
     const navigate = useNavigate();
 
     return (
-        <div id="header">
+        <header>
             <img
                 id="header-logo"
                 src="/images/logo.png"
                 onClick={() => navigate('/')}
             />
             <HeaderBar signedIn={signedIn} />
-        </div>
+        </header>
     );
 }
 
