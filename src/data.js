@@ -14,3 +14,26 @@ export const CREATE_AD_STAGES = [
     "3. Место и время",
     "4. Способ связи",
 ];
+
+export const DROPDOWN_VALUES = {
+    status: [
+        ["lost", "Потеряно"],
+        ["found", "Найдено"],
+    ],
+    type: [
+        ["dog", "Собака"],
+        ["cat", "Кошка"],
+    ],
+    breed: [
+        ["labrador", "Лабрадор"],
+        ["german_shepherd", "Немецкая овчарка"],
+        ["poodle", "Пудель"],
+        ["metis", "Метис"],
+    ],
+};
+
+export const DROPDOWN_SECTION_VALUES = {
+    status: 'Статус',
+    type: 'Животное',
+    breed: 'Порода'
+}

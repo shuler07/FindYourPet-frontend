@@ -29,7 +29,7 @@ export default function MainPage() {
     return (
         <>
             <Header />
-            <div id="main-page-container">
+            <div className="page-container">
                 <section id="main-page-intro-section">
                     <h1>Find Your Pet</h1>
                     <h2 style={{ textAlign: "center" }}>

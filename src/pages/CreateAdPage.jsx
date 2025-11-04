@@ -2,12 +2,22 @@ import "./CreateAdPage.css";
 
 import { useRef, useState } from "react";
 
+import React from "react";
+
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import DropdownLabeled from "../components/DropdownLabeled";
 import InputLabeled from "../components/InputLabeled";
+import { InputAddressLabeled } from "../components/InputLabeled";
 
 import { API_PATHS, CREATE_AD_STAGES, DEBUG } from "../data";
+import {
+    YMap,
+    YMapDefaultSchemeLayer,
+    YMapDefaultFeaturesLayer,
+    // YMapMarker,
+    // reactify,
+} from "../ymaps";
 
 export default function CreateAdPage() {
     const [activeStage, setActiveStage] = useState(0);
@@ -32,7 +42,7 @@ export default function CreateAdPage() {
         extras: "", // extra information from creator
     });
 
-    const ProcessNavigationButtonClick = (delta) => {
+    const ProcessNavigationButtonClick = async (delta) => {
         if (delta == -1) {
             setActiveStage((prev) => prev - 1);
             return;
@@ -41,7 +51,7 @@ export default function CreateAdPage() {
         if (!validateFieldsFunc.current()) return;
 
         if (activeStage != 3) {
-            applyFieldsFunc.current();
+            await applyFieldsFunc.current();
             setActiveStage((prev) => prev + 1);
         } else CreateAd();
     };
@@ -65,7 +75,7 @@ export default function CreateAdPage() {
     return (
         <>
             <Header />
-            <div id="create-ad-page-container">
+            <div className="page-container" style={{ justifyContent: "start" }}>
                 <div id="ad-container">
                     <h2>Создание объявления</h2>
                     <StagesContainer activeStage={activeStage} />
@@ -189,6 +199,7 @@ function MainInformationFields({ validate, apply, adDetails }) {
                     ["found", "Нашли"],
                 ]}
                 ref={refs.status}
+                value={adDetails.current.status}
             />
         </div>
     );
@@ -244,6 +255,7 @@ function PetInformationFields({ validate, apply, adDetails }) {
                     ["cat", "Кошка"],
                 ]}
                 ref={refs.type}
+                value={adDetails.current.type}
             />
             <DropdownLabeled
                 dropdownId="PetBreed"
@@ -255,6 +267,7 @@ function PetInformationFields({ validate, apply, adDetails }) {
                     ["metis", "Метис"],
                 ]}
                 ref={refs.breed}
+                value={adDetails.current.breed}
             />
             <InputLabeled
                 inputId="PetColor"
@@ -274,6 +287,7 @@ function PetInformationFields({ validate, apply, adDetails }) {
                     ["big", "Крупный"],
                 ]}
                 ref={refs.size}
+                value={adDetails.current.size}
             />
             <InputLabeled
                 inputId="PetDistincts"
@@ -302,6 +316,7 @@ function PetInformationFields({ validate, apply, adDetails }) {
                     ["unknown", "Не знаю"],
                 ]}
                 ref={refs.danger}
+                value={adDetails.current.danger}
             />
         </div>
     );
@@ -310,7 +325,6 @@ function PetInformationFields({ validate, apply, adDetails }) {
 function LocationFields({ validate, apply, adDetails }) {
     const refs = {
         location: useRef(),
-        geoLocation: null,
         time: useRef(),
     };
 
@@ -330,35 +344,84 @@ function LocationFields({ validate, apply, adDetails }) {
         return flag;
     };
 
-    apply.current = () => {
-        adDetails.current = {
-            ...adDetails.current,
-            location: refs.location.current.value,
-            geoLocation: "",
-            time: refs.time.current.value,
+    apply.current = async () => {
+        async function getGeolocation() {
+            try {
+                const response = await fetch(`https://geocode-maps.yandex.ru/v1/?apikey=0df3ff72-ac8d-4cf0-9404-d9b5ec44d936&geocode=${refs.location.current.value.replaceAll(' ', '+')}&format=json`)
+            
+                const data = await response.json();
+
+                if (DEBUG) console.debug('Getting geolocation. Data received:', data);
+
+                return data;
+            } catch (error) {
+                console.error('Getting geolocation. Error:', error);
+            };
+        };
+
+        const data = await getGeolocation();
+
+        try {
+            const geoLocation = data.response.GeoObjectCollection.featureMember[0].GeoObject.Point.pos;
+            
+            if (DEBUG) console.debug('Resolving geolocation. Data received:', geoLocation);
+
+            adDetails.current = {
+                ...adDetails.current,
+                location: refs.location.current.value,
+                geoLocation: geoLocation,
+                time: refs.time.current.value,
+            };
+        } catch (error) {
+            console.error('Resolving geolocation. Error:', error);
+
+            adDetails.current = {
+                ...adDetails.current,
+                location: refs.location.current.value,
+                geoLocation: null,
+                time: refs.time.current.value,
+            };
         };
     };
 
     return (
         <div id="fields-container">
-            <InputLabeled
+            <InputAddressLabeled
                 inputId="PetLocation"
                 type="text"
                 placeholder="Город, район, улица, поселок, место"
-                autoComplete={null}
                 label="Где вы последний раз видели животное?"
                 ref={refs.location}
+                defaultValue={adDetails.current.location}
                 value={adDetails.current.location}
             />
             <InputLabeled
                 inputId="PetTime"
                 type="text"
-                placeholder="ДД.ММ.ГГГГ чч:мм:сс"
-                autoComplete={null}
-                label="Примерное время, когда вы потеряли или нашли животное?"
+                placeholder="дд.ММ.гггг чч:мм"
+                label="Когда вы потеряли или нашли животное?"
                 ref={refs.time}
+                defaultValue={adDetails.current.time}
                 value={adDetails.current.time}
             />
+
+            <div id='create-ad-map'>
+                <YMap
+                    location={{ center: [37.617644, 55.755819], zoom: 9 }}
+                    style={{ width: "100%", height: "100%" }}
+                >
+                    <YMapDefaultSchemeLayer />
+                    <YMapDefaultFeaturesLayer />
+                    {/* <YMapMarker
+                        coordinates={[37.588144, 55.733842]}
+                        draggable={true}
+                    >
+                        <section>
+                            <h1>You can drag this header</h1>
+                        </section>
+                    </YMapMarker> */}
+                </YMap>
+            </div>
         </div>
     );
 }
