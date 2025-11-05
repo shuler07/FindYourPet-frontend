@@ -193,7 +193,7 @@ function MainInformationFields({ validate, apply, adDetails }) {
         <div id="fields-container">
             <DropdownLabeled
                 dropdownId="PetLostFound"
-                label="Потеряли или нашли животное?"
+                label="Потеряли или нашли животное? *"
                 choices={[
                     ["lost", "Потеряли"],
                     ["found", "Нашли"],
@@ -249,7 +249,7 @@ function PetInformationFields({ validate, apply, adDetails }) {
         <div id="fields-container">
             <DropdownLabeled
                 dropdownId="PetType"
-                label="Животное"
+                label="Тип животного *"
                 choices={[
                     ["dog", "Собака"],
                     ["cat", "Кошка"],
@@ -259,7 +259,7 @@ function PetInformationFields({ validate, apply, adDetails }) {
             />
             <DropdownLabeled
                 dropdownId="PetBreed"
-                label="Порода"
+                label="Порода *"
                 choices={[
                     ["labrador", "Лабрадор"],
                     ["german_shepherd", "Немецкая овчарка"],
@@ -273,14 +273,14 @@ function PetInformationFields({ validate, apply, adDetails }) {
                 inputId="PetColor"
                 type="text"
                 placeholder="Рыжий, черный, серый с черными пятнами"
-                autoComplete={null}
-                label="Окрас"
+                autoComplete="off"
+                label="Окрас *"
                 ref={refs.color}
                 value={adDetails.current.color}
             />
             <DropdownLabeled
                 dropdownId="PetSize"
-                label="Размер"
+                label="Размер *"
                 choices={[
                     ["little", "Маленький"],
                     ["medium", "Средний"],
@@ -293,8 +293,8 @@ function PetInformationFields({ validate, apply, adDetails }) {
                 inputId="PetDistincts"
                 type="text"
                 placeholder="Шрамы, ошейник, бирка, особые признаки"
-                autoComplete={null}
-                label="Отличительные признаки (необязательно)"
+                autoComplete="off"
+                label="Отличительные признаки"
                 ref={refs.distincts}
                 value={adDetails.current.distincts}
             />
@@ -302,14 +302,14 @@ function PetInformationFields({ validate, apply, adDetails }) {
                 inputId="PetNickname"
                 type="text"
                 placeholder=""
-                autoComplete={null}
-                label="Кличка (необязательно)"
+                autoComplete="off"
+                label="Кличка"
                 ref={refs.nickname}
                 value={adDetails.current.nickname}
             />
             <DropdownLabeled
                 dropdownId="PetDanger"
-                label="Животное может быть опасным для окружающих?"
+                label="Животное может быть опасным для окружающих? *"
                 choices={[
                     ["danger", "Да"],
                     ["safe", "Нет"],
@@ -347,24 +347,36 @@ function LocationFields({ validate, apply, adDetails }) {
     apply.current = async () => {
         async function getGeolocation() {
             try {
-                const response = await fetch(`https://geocode-maps.yandex.ru/v1/?apikey=0df3ff72-ac8d-4cf0-9404-d9b5ec44d936&geocode=${refs.location.current.value.replaceAll(' ', '+')}&format=json`)
-            
+                const response = await fetch(
+                    `https://geocode-maps.yandex.ru/v1/?apikey=0df3ff72-ac8d-4cf0-9404-d9b5ec44d936&geocode=${refs.location.current.value.replaceAll(
+                        " ",
+                        "+"
+                    )}&format=json`
+                );
+
                 const data = await response.json();
 
-                if (DEBUG) console.debug('Getting geolocation. Data received:', data);
+                if (DEBUG)
+                    console.debug("Getting geolocation. Data received:", data);
 
                 return data;
             } catch (error) {
-                console.error('Getting geolocation. Error:', error);
-            };
-        };
+                console.error("Getting geolocation. Error:", error);
+            }
+        }
 
         const data = await getGeolocation();
 
         try {
-            const geoLocation = data.response.GeoObjectCollection.featureMember[0].GeoObject.Point.pos;
-            
-            if (DEBUG) console.debug('Resolving geolocation. Data received:', geoLocation);
+            const geoLocation =
+                data.response.GeoObjectCollection.featureMember[0].GeoObject
+                    .Point.pos;
+
+            if (DEBUG)
+                console.debug(
+                    "Resolving geolocation. Data received:",
+                    geoLocation
+                );
 
             adDetails.current = {
                 ...adDetails.current,
@@ -373,7 +385,7 @@ function LocationFields({ validate, apply, adDetails }) {
                 time: refs.time.current.value,
             };
         } catch (error) {
-            console.error('Resolving geolocation. Error:', error);
+            console.error("Resolving geolocation. Error:", error);
 
             adDetails.current = {
                 ...adDetails.current,
@@ -381,7 +393,7 @@ function LocationFields({ validate, apply, adDetails }) {
                 geoLocation: null,
                 time: refs.time.current.value,
             };
-        };
+        }
     };
 
     return (
@@ -390,7 +402,7 @@ function LocationFields({ validate, apply, adDetails }) {
                 inputId="PetLocation"
                 type="text"
                 placeholder="Город, район, улица, поселок, место"
-                label="Где вы последний раз видели животное?"
+                label="Где вы последний раз видели животное? *"
                 ref={refs.location}
                 defaultValue={adDetails.current.location}
                 value={adDetails.current.location}
@@ -399,13 +411,13 @@ function LocationFields({ validate, apply, adDetails }) {
                 inputId="PetTime"
                 type="text"
                 placeholder="дд.ММ.гггг чч:мм"
-                label="Когда вы потеряли или нашли животное?"
+                label="Когда вы потеряли или нашли животное? *"
                 ref={refs.time}
                 defaultValue={adDetails.current.time}
                 value={adDetails.current.time}
             />
 
-            <div id='create-ad-map'>
+            <div id="create-ad-map">
                 <YMap
                     location={{ center: [37.617644, 55.755819], zoom: 9 }}
                     style={{ width: "100%", height: "100%" }}
@@ -466,8 +478,8 @@ function ContactFields({ validate, apply, adDetails }) {
                 inputId="PetContactName"
                 type="text"
                 placeholder="Имя"
-                autoComplete={null}
-                label="Ваше имя"
+                autoComplete="off"
+                label="Ваше имя *"
                 ref={refs.contactName}
                 value={adDetails.current.contactName}
             />
@@ -476,7 +488,7 @@ function ContactFields({ validate, apply, adDetails }) {
                 type="tel"
                 placeholder="+7(___)___-__-__"
                 autoComplete="tel"
-                label="Ваш телефон"
+                label="Ваш телефон *"
                 ref={refs.contactPhone}
                 value={adDetails.current.contactPhone}
             />
@@ -485,7 +497,7 @@ function ContactFields({ validate, apply, adDetails }) {
                 type="email"
                 placeholder="example@mail.com"
                 autoComplete="email"
-                label="Ваша почта"
+                label="Ваша электронная почта *"
                 ref={refs.contactEmail}
                 value={adDetails.current.contactEmail}
             />
@@ -493,8 +505,8 @@ function ContactFields({ validate, apply, adDetails }) {
                 inputId="PetContactExtra"
                 type="text"
                 placeholder="Хотите указать что-то еще?"
-                autoComplete={null}
-                label="Дополнительная информация (необязательно)"
+                autoComplete="off"
+                label="Дополнительная информация"
                 ref={refs.extras}
                 value={adDetails.current.extras}
             />
@@ -515,7 +527,7 @@ function StageNavigationContainer({
                 disabled={backDisabled}
                 onClick={() => processNavigationButtonClick(-1)}
             >
-                <h3>Назад</h3>
+                Назад
                 <img src="/icons/left-arrow.svg" />
             </button>
             <button
@@ -523,7 +535,7 @@ function StageNavigationContainer({
                 className="primary-button"
                 onClick={() => processNavigationButtonClick(1)}
             >
-                <h3>{lastRenamed ? "Создать" : "Далее"}</h3>
+                {lastRenamed ? "Создать" : "Далее"}
                 <img
                     src={
                         lastRenamed

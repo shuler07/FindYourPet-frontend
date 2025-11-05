@@ -89,10 +89,10 @@ export default function SigninPage() {
     }
 
     return (
-        <div id="signin-page-container">
+        <div id="signin-page-container" className="gradient-accent">
             <form id="signin-form">
                 <BackButton />
-                <div id="left-form">
+                <div id="left-form" className="gradient-primary">
                     <h1 style={{ color: "white", opacity: 0 }}>
                         Find Your Pet
                     </h1>
@@ -177,7 +177,7 @@ function BackButton() {
 
 function RightFormToogleContainer({ isRegister, setIsRegister }) {
     return (
-        <div id="right-form-toogle-container">
+        <div id="right-form-toogle-container" className="gradient-accent">
             <div
                 id="right-form-active-button"
                 className={`${isRegister && "register"}`}

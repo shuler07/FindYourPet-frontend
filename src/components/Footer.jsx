@@ -6,7 +6,7 @@ export default function Footer() {
     const navigate = useNavigate();
 
     return (
-        <footer>
+        <footer className="gradient-primary">
             <h6 style={{ color: "#eee" }}>
                 © 2025 FindYourPet. Все права защищены. Сделано с любовью к
                 питомцам{" "}

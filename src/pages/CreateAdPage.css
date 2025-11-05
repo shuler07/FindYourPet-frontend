@@ -77,11 +77,6 @@
     width: max(30%, 6rem);
     flex-direction: row-reverse;
 }
-#prev-stage-button:disabled {
-    background: var(--primary-light);
-    cursor: default;
-}
-
 #prev-stage-button:hover:not(:disabled) img {
     translate: -2px 0;
 }
