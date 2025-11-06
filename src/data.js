@@ -1,10 +1,13 @@
+const API_BASENAME = "http://localhost:8000";
 export const API_PATHS = {
-    auth: "todo",
-    register: "todo",
-    login: "todo",
+    auth: API_BASENAME + "/me",
+    refresh: API_BASENAME + "/refresh",
+    register: API_BASENAME + "/register",
+    login: API_BASENAME + "/login",
+    logout: API_BASENAME + "/logout",
 
-    create_ad: "todo",
-    get_ads: "todo",
+    create_ad: API_BASENAME + "todo",
+    get_ads: API_BASENAME + "todo",
 };
 
 export const DEBUG = true;

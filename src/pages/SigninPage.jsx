@@ -1,7 +1,8 @@
 import "./SigninPage.css";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AppContext } from "../App";
 
 import InputLabeled from "../components/InputLabeled";
 
@@ -18,6 +19,10 @@ export default function SigninPage() {
     const emailInputRef = useRef();
     const passwordInputRef = useRef();
     const confirmPasswordRef = useRef();
+
+    const navigate = useNavigate();
+
+    const { setSignedIn } = useContext(AppContext);
 
     const credsValid = (email, password, confirm_password) => {
         let flag = true;
@@ -83,6 +88,11 @@ export default function SigninPage() {
 
             const data = await response.json();
             if (DEBUG) console.debug("Logining. Data received:", data);
+
+            if (data.success) {
+                setSignedIn(true);
+                navigate('/');
+            };
         } catch (error) {
             console.error("Logining. Error occured:", error);
         }
@@ -210,7 +220,7 @@ function AuthButton({ isRegister, event }) {
             type="button"
             onClick={event}
         >
-            <h3>{isRegister ? "Зарегистрироваться" : "Войти"}</h3>
+            {isRegister ? "Зарегистрироваться" : "Войти"}
             <img src="/icons/right-arrow.svg" />
         </button>
     );
