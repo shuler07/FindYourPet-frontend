@@ -2,7 +2,7 @@
     padding: 4rem;
     width: calc(100% - 8rem);
     height: 60dvh;
-    background: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.5) 50%), url("https://images.unsplash.com/photo-1552053831-71594a27632d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2012&q=80")
+    background: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.5) 50%), url("/images/main-intro-image.webp")
     center+35%/cover;
     display: flex;
     gap: 1rem;

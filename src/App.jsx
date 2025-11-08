@@ -14,7 +14,7 @@ import { API_PATHS, DEBUG } from "./data";
 export const AppContext = createContext();
 
 export default function App() {
-    const [signedIn, setSignedIn] = useState(false);
+    const [signedIn, setSignedIn] = useState(true);
     useEffect(() => {
         CheckAuth();
     }, [signedIn]);
