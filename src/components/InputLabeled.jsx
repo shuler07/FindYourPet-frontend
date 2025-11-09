@@ -42,19 +42,24 @@ export function InputAddressLabeled({
 }) {
     const [text, setText] = useState(value);
     useEffect(() => {
-        if (text.length <= 2 || true) return;
+        if (text.length <= 3) return;
 
         const handler = setTimeout(() => {
             async function getResponse() {
                 try {
                     const response = await fetch(
-                        `https://suggest-maps.yandex.ru/v1/suggest?apikey=9ccf9d40-e7af-48a4-b5f6-a277ce078160&text=${text}&results=5`
+                        `https://suggest-maps.yandex.ru/v1/suggest?apikey=${
+                            import.meta.env.VITE_YMAPS_GEOSUGGEST_API_KEY
+                        }&text=${text}&results=5`
                     );
 
                     const data = await response.json();
 
                     if (DEBUG)
-                        console.log("Searching addresses. Data received:", data);
+                        console.log(
+                            "Searching addresses. Data received:",
+                            data
+                        );
                 } catch (error) {
                     console.error("Searchin addresses. Error:", error);
                 }

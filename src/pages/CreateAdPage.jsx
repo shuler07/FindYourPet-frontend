@@ -348,7 +348,9 @@ function LocationFields({ validate, apply, adDetails }) {
         async function getGeolocation() {
             try {
                 const response = await fetch(
-                    `https://geocode-maps.yandex.ru/v1/?apikey=0df3ff72-ac8d-4cf0-9404-d9b5ec44d936&geocode=${refs.location.current.value.replaceAll(
+                    `https://geocode-maps.yandex.ru/v1/?apikey=${
+                        import.meta.env.VITE_YMAPS_API_KEY
+                    }&geocode=${refs.location.current.value.replaceAll(
                         " ",
                         "+"
                     )}&format=json`
