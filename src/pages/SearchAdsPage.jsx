@@ -1,13 +1,19 @@
 import "./SearchAdsPage.css";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { AppContext } from "../App";
 
 import Footer from "../components/Footer";
 import Header from "../components/Header";
+import AdsContainer from "../components/AdsContainer";
 
 import { AD_INFO_DICT, AD_FILTERS_DICT, API_PATHS, DEBUG } from "../data";
+import { RestartAnim } from "../functions";
 
 export default function SearchAdsPage() {
+    // Alert
+    const { setAlert, alertRef } = useContext(AppContext);
+
     // Ads
     const [ads, setAds] = useState([]);
 
@@ -49,126 +55,45 @@ export default function SearchAdsPage() {
 
     const [applyFiltersDisabled, setApplyFiltersDisabled] = useState(true);
 
+    // Sidebar
+    const [mobileView, setMobileView] = useState(window.innerWidth <= 768);
+
+    window.addEventListener(
+        "resize",
+        () => {
+            if (window.innerWidth <= 768 && !mobileView) setMobileView(true);
+            else if (window.innerWidth > 768 && mobileView)
+                setMobileView(false);
+        },
+        [mobileView]
+    );
+
+    const [sidebarOpened, setSidebarOpened] = useState(false);
+
     async function GetAds() {
         try {
             const filters = Object.fromEntries(
                 Object.entries(activeFilters).filter(([_, v]) => v != "any")
             );
 
-            // const response = await fetch(API_PATHS.get_ads, {
-            //     method: "GET",
-            //     body: JSON.stringify(filters),
-            //     headers: { "Content-Type": "application/json" },
-            // });
-
-            // const data = await response.json();
-            // if (DEBUG) console.debug("Getting ads. Data received:", data);
-
-            const tempAds = [
-                {
-                    status: "lost",
-                    type: "dog",
-                    breed: "labrador",
-                    color: "Черно-серый",
-                    size: "medium",
-                    distincts: "Ошейник",
-                    nickname: "Келли",
-                    danger: "safe",
-                    location: "Москва, Волоколамское шоссе, д. 4",
-                    geoLocation: "52.234212 34.531232",
-                    time: "05.11.2025 12:00",
-                    contactName: "Иванов Иван",
-                    contactPhone: "89123456789",
-                    contactEmail: "ivanovivan@pochta.ru",
-                    extras: null,
-                },
-                {
-                    status: "found",
-                    type: "cat",
-                    breed: "metis",
-                    color: "Белый",
-                    size: "little",
-                    distincts: null,
-                    nickname: null,
-                    danger: "safe",
-                    location: "Москва, Волоколамское шоссе, д. 5",
-                    geoLocation: "52.234312 34.531214",
-                    time: "04.11.2025 14:00",
-                    contactName: "Иванов Иван",
-                    contactPhone: "89123456789",
-                    contactEmail: "ivanovivan@pochta.ru",
-                    extras: "Свяжитесь в telegram: @ivanovivantelegram, на звонки могу не отвечать",
-                },
-                {
-                    status: "found",
-                    type: "cat",
-                    breed: "metis",
-                    color: "Белый",
-                    size: "little",
-                    distincts: null,
-                    nickname: null,
-                    danger: "safe",
-                    location: "Москва, Волоколамское шоссе, д. 5",
-                    geoLocation: "52.234312 34.531214",
-                    time: "04.11.2025 14:00",
-                    contactName: "Иванов Иван",
-                    contactPhone: "89123456789",
-                    contactEmail: "ivanovivan@pochta.ru",
-                    extras: "Свяжитесь в telegram: @ivanovivantelegram, на звонки могу не отвечать",
-                },
-            ];
-            const data = tempAds.filter((v) => {
-                if (
-                    Object.hasOwn(filters, "status") &&
-                    v.status != filters.status
-                ) {
-                    return false;
-                } else if (
-                    Object.hasOwn(filters, "type") &&
-                    v.type != filters.type
-                ) {
-                    return false;
-                } else if (
-                    Object.hasOwn(filters, "breed") &&
-                    v.breed != filters.breed
-                ) {
-                    return false;
-                } else if (
-                    Object.hasOwn(filters, "size") &&
-                    v.size != filters.size
-                ) {
-                    return false;
-                } else if (
-                    Object.hasOwn(filters, "danger") &&
-                    v.danger != filters.danger
-                ) {
-                    return false;
-                }
-
-                if (
-                    AD_INFO_DICT.status[v.status]
-                        .toLowerCase()
-                        .includes(searchText) ||
-                    AD_INFO_DICT.type[v.type]
-                        .toLowerCase()
-                        .includes(searchText) ||
-                    AD_INFO_DICT.breed[v.breed]
-                        .toLowerCase()
-                        .includes(searchText) ||
-                    AD_INFO_DICT.size[v.size]
-                        .toLowerCase()
-                        .includes(searchText) ||
-                    AD_INFO_DICT.danger[v.danger]
-                        .toLowerCase()
-                        .includes(searchText)
-                )
-                    return true;
-
-                return false;
+            const response = await fetch(API_PATHS.get_ads, {
+                method: "GET",
+                body: JSON.stringify(filters),
+                headers: { "Content-Type": "application/json" },
             });
-            setAds(data);
+
+            const data = await response.json();
+            if (DEBUG) console.debug("Getting ads. Data received:", data);
+
+            if (data.success) setAds(data.ads);
+            else {
+                RestartAnim(alertRef.current);
+                setAlert({ text: "Попробуйте позже", color: "red" });
+            }
         } catch (error) {
             console.error("Getting ads. Error:", error);
+            RestartAnim(alertRef.current);
+            setAlert({ text: "Что-то пошло не так", color: "red" });
         }
     }
 
@@ -181,11 +106,14 @@ export default function SearchAdsPage() {
                     changedFilters={changedFilters}
                     setChangedFilters={setChangedFilters}
                     applyFiltersDisabled={applyFiltersDisabled}
+                    sidebarOpened={mobileView ? sidebarOpened : true}
                 />
                 <MainContainer
                     searchText={searchText}
                     setSearchText={setSearchText}
                     ads={ads}
+                    mobileView={mobileView}
+                    setSidebarOpened={setSidebarOpened}
                 />
             </div>
             <Footer />
@@ -198,6 +126,7 @@ function SideBar({
     changedFilters,
     setChangedFilters,
     applyFiltersDisabled,
+    sidebarOpened,
 }) {
     const showElems = () => {
         return Object.entries(changedFilters).map((value, index) => (
@@ -211,7 +140,10 @@ function SideBar({
     };
 
     return (
-        <div id="search-sidebar">
+        <div
+            id="search-sidebar"
+            style={{ display: sidebarOpened ? "flex" : "none" }}
+        >
             <h3>Фильтры</h3>
             {showElems()}
             <button
@@ -258,26 +190,27 @@ function SideBarElement({ type, value, event }) {
     );
 }
 
-function MainContainer({ searchText, setSearchText, ads }) {
-    const showAds = () => {
-        return ads.map((value, index) => (
-            <AdCard key={`keyAdCard${index}`} {...value} />
-        ));
-    };
-
+function MainContainer({
+    searchText,
+    setSearchText,
+    ads,
+    mobileView,
+    setSidebarOpened,
+}) {
     return (
         <div id="search-container">
-            <SearchBar value={searchText} event={setSearchText} />
-            <div
-                style={{
-                    width: "100%",
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "1rem",
-                }}
-            >
-                {showAds()}
+            <div style={{ display: "flex", gap: "1rem", width: "100%" }}>
+                <SearchBar value={searchText} event={setSearchText} />
+                {mobileView && (
+                    <div
+                        id="switch-sidebar"
+                        onClick={() => setSidebarOpened((prev) => !prev)}
+                    >
+                        <img src="/icons/filter.svg" />
+                    </div>
+                )}
             </div>
+            <AdsContainer ads={ads} />
         </div>
     );
 }
@@ -293,56 +226,6 @@ function SearchBar({ value, event }) {
                 value={value}
                 onChange={(e) => event(e.target.value.toLowerCase())}
             />
-        </div>
-    );
-}
-
-function AdCard({
-    status,
-    type,
-    breed,
-    color,
-    size,
-    distincts,
-    nickname,
-    danger,
-    location,
-    geoLocation,
-    time,
-    contactName,
-    contactPhone,
-    contactEmail,
-    extras,
-}) {
-    const title = nickname ? nickname : "Кличка неизвестна";
-    const subtitle = `${AD_INFO_DICT.type[type]} • ${AD_INFO_DICT.breed[breed]}`;
-    const description = `Окрас: ${color}, размер: ${AD_INFO_DICT.size[size]}`;
-    const distinctiveFeatures = distincts
-        ? `Отличительные признаки: ${distincts}`
-        : "Отличительные признаки не указаны";
-    const placeAndTimeData = `${location}, ${time}`;
-
-    return (
-        <div className="ad-card">
-            <img src="/images/image-not-found.png" />
-            <div
-                className="ad-card-status"
-                style={{ background: status == "lost" ? "#f53535" : "#1fcf1f" }}
-            >
-                <h3>{AD_INFO_DICT.status[status]}</h3>
-            </div>
-            <div className="ad-card-info-block">
-                <h3>{title}</h3>
-                <h6>{subtitle}</h6>
-                <h6>{description}</h6>
-                <h6>{distinctiveFeatures}</h6>
-                <h6>{AD_INFO_DICT.danger[danger]}</h6>
-                <h6>{placeAndTimeData}</h6>
-            </div>
-            <button className="primary-button gradient-primary">
-                Подробнее
-                <img src="/icons/right-arrow.svg" />
-            </button>
         </div>
     );
 }

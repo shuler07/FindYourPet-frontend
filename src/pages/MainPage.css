@@ -1,7 +1,8 @@
 #main-page-intro-section {
+    margin-top: -5rem;
     padding: 4rem;
     width: calc(100% - 8rem);
-    height: 60dvh;
+    height: 70dvh;
     background: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.5) 50%), url("/images/main-intro-image.webp")
     center+35%/cover;
     display: flex;
@@ -80,7 +81,7 @@
 
 @media (max-width: 768px) {
     #main-page-intro-section {
-        height: 50dvh;
+        height: 60dvh;
     }
 
     #main-page-navigate-section {

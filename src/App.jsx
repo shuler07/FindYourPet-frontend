@@ -1,13 +1,15 @@
-import { useEffect, useState, createContext } from "react";
+import { useEffect, useRef, useState, createContext } from "react";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
+import Alert from "./components/Alert";
 import MainPage from "./pages/MainPage";
 import SigninPage from "./pages/SigninPage";
 import HelpPage from "./pages/HelpPage";
 import CreateAdPage from "./pages/CreateAdPage";
 import SearchAdsPage from "./pages/SearchAdsPage";
 import AuthorsPage from "./pages/AuthorsPage";
+import ProfilePage from "./pages/ProfilePage";
 
 import { API_PATHS, DEBUG } from "./data";
 
@@ -15,9 +17,12 @@ export const AppContext = createContext();
 
 export default function App() {
     const [signedIn, setSignedIn] = useState(true);
-    useEffect(() => {
-        CheckAuth();
-    }, [signedIn]);
+    // useEffect(() => {
+    //     CheckAuth();
+    // }, [signedIn]);
+
+    const [alert, setAlert] = useState({ text: null, color: null });
+    const alertRef = useRef();
 
     async function CheckAuth() {
         try {
@@ -61,17 +66,19 @@ export default function App() {
     }
 
     return (
-        <AppContext.Provider value={{ signedIn, setSignedIn }}>
+        <AppContext.Provider value={{ signedIn, setSignedIn, setAlert, alertRef }}>
             <Router>
                 <Routes>
                     <Route index element={<MainPage />} />
                     <Route path="/signin" element={<SigninPage />} />
+                    <Route path='/profile' element={<ProfilePage />} />
                     <Route path="/help" element={<HelpPage />} />
                     <Route path="/ads/create" element={<CreateAdPage />} />
                     <Route path="/ads" element={<SearchAdsPage />} />
                     <Route path="/authors" element={<AuthorsPage />} />
                 </Routes>
             </Router>
+            <Alert text={alert.text} color={alert.color} ref={alertRef} />
         </AppContext.Provider>
     );
 }

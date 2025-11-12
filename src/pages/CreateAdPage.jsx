@@ -1,6 +1,7 @@
 import "./CreateAdPage.css";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useContext } from "react";
+import { AppContext } from "../App";
 
 import React from "react";
 
@@ -18,6 +19,7 @@ import {
     // YMapMarker,
     // reactify,
 } from "../ymaps";
+import { RestartAnim } from "../functions";
 
 export default function CreateAdPage() {
     const [activeStage, setActiveStage] = useState(0);
@@ -30,7 +32,7 @@ export default function CreateAdPage() {
         breed: "", // ONLY labrador, german_shepherd, poodle, metis etc
         color: "", // pet color
         size: "", // ONLY little / medium / big
-        distincts: "", // distinctive features
+        distincts: "", // distinctive features (unneccessary)
         nickname: "", // pet nickname (unneccessary)
         danger: "", // ONLY danger / safe / unknown
         location: "", // place (in words)
@@ -39,8 +41,10 @@ export default function CreateAdPage() {
         contactName: "", // contact name of creator
         contactPhone: "", // contact phone of creator
         contactEmail: "", // contact email of creator
-        extras: "", // extra information from creator
+        extras: "", // extra information from creator (unneccessary)
     });
+
+    const { setAlert, alertRef } = useContext(AppContext);
 
     const ProcessNavigationButtonClick = async (delta) => {
         if (delta == -1) {
@@ -48,7 +52,11 @@ export default function CreateAdPage() {
             return;
         }
 
-        if (!validateFieldsFunc.current()) return;
+        if (!validateFieldsFunc.current()) {
+            RestartAnim(alertRef.current);
+            setAlert({ text: "Заполните обязательные поля", color: "red" });
+            return;
+        };
 
         if (activeStage != 3) {
             await applyFieldsFunc.current();
@@ -67,8 +75,17 @@ export default function CreateAdPage() {
 
             const data = await response.json();
             if (DEBUG) console.debug("Creating ad. Data received:", data);
+
+            RestartAnim(alertRef.current);
+            if (data.success)
+                setAlert({
+                    text: "Объявление успешно создано",
+                    color: "green",
+                });
+            else setAlert({ text: "Попробуйте позже", color: "red" });
         } catch (error) {
             console.error("Creating ad. Error occured:", error);
+            setAlert({ text: "Что-то пошло не так", color: "red" });
         }
     }
 
