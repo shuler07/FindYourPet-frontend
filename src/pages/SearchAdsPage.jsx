@@ -43,33 +43,8 @@ export default function SearchAdsPage() {
         radius: 1,
     });
     useEffect(() => {
-        GetAds();
-        setApplyFiltersDisabled(true);
         console.log(activeFilters);
     }, [activeFilters]);
-
-    const [changedFilters, setChangedFilters] = useState({ ...activeFilters });
-    useEffect(() => {
-        const actFilt = Object.values(activeFilters);
-        const chngFilt = Object.values(changedFilters);
-
-        let flag = true;
-        for (let i = 0; i < actFilt.length; i++) {
-            if (actFilt[i] != chngFilt[i]) {
-                flag = false;
-                break;
-            }
-        }
-
-        if (placeSection == "place") {
-            if (!changedFilters.geoloc || changedFilters.radius < 1)
-                flag = true;
-        }
-
-        setApplyFiltersDisabled(flag);
-    }, [changedFilters]);
-
-    const [applyFiltersDisabled, setApplyFiltersDisabled] = useState(true);
 
     // Sidebar
     const [placeSection, setPlaceSection] = useState("region");
@@ -174,10 +149,9 @@ export default function SearchAdsPage() {
             <Header />
             <div className="page-container" id="search-ads-page-container">
                 <SideBar
+                    activeFilters={activeFilters}
                     setActiveFilters={setActiveFilters}
-                    changedFilters={changedFilters}
-                    setChangedFilters={setChangedFilters}
-                    applyFiltersDisabled={applyFiltersDisabled}
+                    getAds={GetAds}
                     sidebarOpened={mobileView ? sidebarOpened : true}
                     setGeolocOpened={setGeolocOpened}
                     placeSection={placeSection}
@@ -195,7 +169,7 @@ export default function SearchAdsPage() {
                 <GeolocSelection
                     location={activeFilters.geoloc}
                     setGeolocOpened={setGeolocOpened}
-                    setChangedFilters={setChangedFilters}
+                    setActiveFilters={setActiveFilters}
                 />
             )}
             <Footer />
@@ -204,24 +178,23 @@ export default function SearchAdsPage() {
 }
 
 function SideBar({
+    activeFilters,
     setActiveFilters,
-    changedFilters,
-    setChangedFilters,
-    applyFiltersDisabled,
+    getAds,
     sidebarOpened,
     setGeolocOpened,
     placeSection,
     setPlaceSection,
 }) {
     const showElems = () => {
-        return Object.entries(changedFilters).map((value, index) => {
+        return Object.entries(activeFilters).map((value, index) => {
             if (!["region", "geoloc", "radius"].includes(value[0])) {
                 return (
                     <SideBarElement
                         key={`keySidebarElement${index}`}
                         type={value[0]}
                         value={value[1]}
-                        event={setChangedFilters}
+                        event={setActiveFilters}
                     />
                 );
             }
@@ -229,7 +202,7 @@ function SideBar({
     };
 
     const handleChangeRadius = (e) => {
-        setChangedFilters((prev) => ({ ...prev, radius: e.target.value }));
+        setActiveFilters((prev) => ({ ...prev, radius: e.target.value }));
     };
 
     return (
@@ -261,8 +234,8 @@ function SideBar({
             {placeSection == "region" ? (
                 <SideBarElement
                     type="region"
-                    value={changedFilters.region}
-                    event={setChangedFilters}
+                    value={activeFilters.region}
+                    event={setActiveFilters}
                 />
             ) : (
                 <>
@@ -273,10 +246,10 @@ function SideBar({
                             style={{ width: "calc(100% - 2rem)" }}
                             onClick={() => setGeolocOpened(true)}
                         >
-                            {changedFilters.geoloc
-                                ? `${changedFilters.geoloc[0].toFixed(
+                            {activeFilters.geoloc
+                                ? `${activeFilters.geoloc[0].toFixed(
                                       4
-                                  )} ${changedFilters.geoloc[1].toFixed(4)}`
+                                  )} ${activeFilters.geoloc[1].toFixed(4)}`
                                 : "Не выбрана"}
                         </div>
                     </div>
@@ -290,18 +263,22 @@ function SideBar({
                             }}
                             type="number"
                             placeholder="Не менее 1"
-                            value={changedFilters.radius}
+                            value={activeFilters.radius}
                             onChange={handleChangeRadius}
                         />
                     </div>
                 </>
             )}
             <button
-                disabled={applyFiltersDisabled}
-                className="primary-button"
-                onClick={() => setActiveFilters({ ...changedFilters })}
+                disabled={
+                    placeSection == "place" &&
+                    (!activeFilters.geoloc || activeFilters.radius < 1)
+                }
+                className="primary-button left-img"
+                onClick={getAds}
             >
-                Применить
+                <img src="/icons/search.svg" />
+                Поиск
             </button>
         </div>
     );
@@ -377,7 +354,7 @@ function SearchBar({ value, event }) {
     );
 }
 
-function GeolocSelection({ location, setGeolocOpened, setChangedFilters }) {
+function GeolocSelection({ location, setGeolocOpened, setActiveFilters }) {
     const mapRef = useRef();
 
     const [mapLocation, setMapLocation] = useState(
@@ -396,7 +373,7 @@ function GeolocSelection({ location, setGeolocOpened, setChangedFilters }) {
     };
 
     const handleClickApply = () => {
-        setChangedFilters((prev) => ({
+        setActiveFilters((prev) => ({
             ...prev,
             geoloc: geopoint,
         }));

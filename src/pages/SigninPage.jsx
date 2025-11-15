@@ -178,7 +178,7 @@ function BackButton() {
     const navigate = useNavigate();
 
     return (
-        <button id="signin-back" className="primary-button" onClick={() => navigate("/")}>
+        <button id="signin-back" className="primary-button left-img" onClick={() => navigate("/")}>
             <img src="/icons/left-arrow.svg" />
             На главную
         </button>
@@ -216,7 +216,7 @@ function AuthButton({ isRegister, event }) {
     return (
         <button
             id="auth-button"
-            className="primary-button"
+            className="primary-button right-img"
             type="button"
             onClick={event}
         >

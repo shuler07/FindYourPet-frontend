@@ -86,7 +86,7 @@ h6 {
     background: var(--primary-color);
     font-family: system-ui;
     font-weight: bold;
-    font-size: 1em;
+    font-size: .9em;
     border: none;
     border-radius: 1rem;
     color: white;
@@ -113,11 +113,14 @@ h6 {
 }
 
 .primary-button > img {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.25rem;
+    height: 1.25rem;
     transition: all .5s ease;
 }
-.primary-button:hover:not(:disabled) img {
+.primary-button.left-img:hover:not(:disabled) > img {
+    translate: -2px 0;
+}
+.primary-button.right-img:hover:not(:disabled) > img {
     translate: 2px 0;
 }
 

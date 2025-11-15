@@ -14,10 +14,6 @@
     background: none;
 }
 
-#signin-back:hover > img {
-    translate: -2px 0;
-}
-
 #signin-form {
     display: flex;
     width: min(90dvw, 60rem);

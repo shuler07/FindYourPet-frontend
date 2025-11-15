@@ -105,15 +105,7 @@
     justify-content: space-between;
 }
 
-#prev-stage-button {
-    width: max(30%, 6rem);
-    flex-direction: row-reverse;
-}
-#prev-stage-button:hover:not(:disabled) img {
-    translate: -2px 0;
-}
-
-#next-stage-button {
+#stage-navigation-container > button {
     width: max(30%, 6rem);
 }
 

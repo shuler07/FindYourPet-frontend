@@ -694,16 +694,16 @@ function StageNavigationContainer({
         <div id="stage-navigation-container">
             <button
                 id="prev-stage-button"
-                className="primary-button"
+                className="primary-button left-img"
                 disabled={backDisabled}
                 onClick={() => processNavigationButtonClick(-1)}
             >
-                Назад
                 <img src="/icons/left-arrow.svg" />
+                Назад
             </button>
             <button
                 id="next-stage-button"
-                className="primary-button"
+                className="primary-button right-img"
                 onClick={() => processNavigationButtonClick(1)}
             >
                 {lastRenamed ? "Создать" : "Далее"}
