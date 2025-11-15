@@ -1,6 +1,6 @@
 import "./CreateAdPage.css";
 
-import { useRef, useState, useContext } from "react";
+import { useRef, useState, useContext, useEffect } from "react";
 import { AppContext } from "../App";
 
 import React from "react";
@@ -9,15 +9,14 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import DropdownLabeled from "../components/DropdownLabeled";
 import InputLabeled from "../components/InputLabeled";
-import { InputAddressLabeled } from "../components/InputLabeled";
 
 import { API_PATHS, CREATE_AD_STAGES, DEBUG } from "../data";
 import {
     YMap,
     YMapDefaultSchemeLayer,
     YMapDefaultFeaturesLayer,
-    // YMapMarker,
-    // reactify,
+    YMapMarker,
+    YMapListener,
 } from "../ymaps";
 import { RestartAnim } from "../functions";
 
@@ -35,8 +34,8 @@ export default function CreateAdPage() {
         distincts: "", // distinctive features (unneccessary)
         nickname: "", // pet nickname (unneccessary)
         danger: "", // ONLY danger / safe / unknown
-        location: "", // place (in words)
-        geoLocation: "", // place (geolocation)
+        location: "", // place in words
+        geoLocation: null, // place in coords
         time: "", // time in dd.MM.yyyy hh:mm:ss
         contactName: "", // contact name of creator
         contactPhone: "", // contact phone of creator
@@ -56,7 +55,7 @@ export default function CreateAdPage() {
             RestartAnim(alertRef.current);
             setAlert({ text: "Заполните обязательные поля", color: "red" });
             return;
-        };
+        }
 
         if (activeStage != 3) {
             await applyFieldsFunc.current();
@@ -342,117 +341,270 @@ function PetInformationFields({ validate, apply, adDetails }) {
 function LocationFields({ validate, apply, adDetails }) {
     const refs = {
         location: useRef(),
+        map: useRef(),
         time: useRef(),
     };
+    const [geopoint, setGeopoint] = useState(adDetails.current.geoLocation);
+
+    const [placeSelection, setPlaceSelection] = useState("write");
 
     validate.current = () => {
         let flag = true;
 
-        Object.values(refs).forEach((ref) => {
-            if (ref != null) {
-                const elem = ref.current;
-                if (elem.value == "") {
-                    elem.classList.add("wrong-field");
-                    flag = false;
-                } else elem.classList.remove("wrong-field");
-            }
-        });
+        if (refs.time.current.value == "") {
+            refs.time.current.classList.add("wrong-field");
+            flag = false;
+        } else refs.time.current.classList.remove("wrong-field");
+
+        if (placeSelection == "write") {
+            if (refs.location.current.value == "") {
+                refs.location.current.classList.add("wrong-field");
+                flag = false;
+            } else refs.location.current.classList.remove("wrong-field");
+        } else {
+            if (!geopoint) {
+                refs.map.current.classList.add("wrong-field");
+                flag = false;
+            } else refs.map.current.classList.remove("wrong-field");
+        }
 
         return flag;
     };
 
     apply.current = async () => {
-        async function getGeolocation() {
-            try {
-                const response = await fetch(
-                    `https://geocode-maps.yandex.ru/v1/?apikey=${
-                        import.meta.env.VITE_YMAPS_API_KEY
-                    }&geocode=${refs.location.current.value.replaceAll(
-                        " ",
-                        "+"
-                    )}&format=json`
-                );
+        if (placeSelection == "write") {
+            async function getGeolocation() {
+                try {
+                    const response = await fetch(
+                        `https://geocode-maps.yandex.ru/v1/?apikey=${
+                            import.meta.env.VITE_YMAPS_API_KEY
+                        }&geocode=${refs.location.current.value.replaceAll(
+                            " ",
+                            "+"
+                        )}&format=json`
+                    );
 
-                const data = await response.json();
+                    const data = await response.json();
 
-                if (DEBUG)
-                    console.debug("Getting geolocation. Data received:", data);
+                    if (DEBUG)
+                        console.debug(
+                            "Getting geolocation. Data received:",
+                            data
+                        );
 
-                return data;
-            } catch (error) {
-                console.error("Getting geolocation. Error:", error);
+                    return data;
+                } catch (error) {
+                    console.error("Getting geolocation. Error:", error);
+                }
             }
-        }
 
-        const data = await getGeolocation();
+            const data = await getGeolocation();
 
-        try {
-            const geoLocation =
-                data.response.GeoObjectCollection.featureMember[0].GeoObject
-                    .Point.pos;
+            try {
+                const geoLocation =
+                    data.response.GeoObjectCollection.featureMember[0].GeoObject.Point.pos.split(
+                        " "
+                    );
 
-            if (DEBUG)
-                console.debug(
-                    "Resolving geolocation. Data received:",
-                    geoLocation
-                );
+                if (DEBUG) {
+                    console.debug(
+                        "Resolving geolocation. Data received:",
+                        geoLocation
+                    );
+                }
 
-            adDetails.current = {
-                ...adDetails.current,
-                location: refs.location.current.value,
-                geoLocation: geoLocation,
-                time: refs.time.current.value,
-            };
-        } catch (error) {
-            console.error("Resolving geolocation. Error:", error);
+                adDetails.current = {
+                    ...adDetails.current,
+                    location: refs.location.current.value,
+                    geoLocation: geoLocation,
+                    time: refs.time.current.value,
+                };
+            } catch (error) {
+                console.error("Resolving geolocation. Error:", error);
 
-            adDetails.current = {
-                ...adDetails.current,
-                location: refs.location.current.value,
-                geoLocation: null,
-                time: refs.time.current.value,
-            };
+                adDetails.current = {
+                    ...adDetails.current,
+                    location: refs.location.current.value,
+                    geoLocation: null,
+                    time: refs.time.current.value,
+                };
+            }
+        } else {
+            async function getAddress() {
+                try {
+                    const response = await fetch(
+                        `https://geocode-maps.yandex.ru/v1/?apikey=${
+                            import.meta.env.VITE_YMAPS_API_KEY
+                        }&geocode=${geopoint}&format=json`
+                    );
+
+                    const data = await response.json();
+
+                    if (DEBUG)
+                        console.debug("Getting address. Data received:", data);
+
+                    return data;
+                } catch (error) {
+                    console.error("Getting address. Error:", error);
+                }
+            }
+
+            const data = await getAddress();
+
+            try {
+                const address =
+                    data.response.GeoObjectCollection.featureMember[0].GeoObject
+                        .Point.pos;
+
+                if (DEBUG) {
+                    console.debug("Resolving address. Data received:", address);
+                }
+
+                adDetails.current = {
+                    ...adDetails.current,
+                    location: address,
+                    geoLocation: geopoint,
+                    time: refs.time.current.value,
+                };
+            } catch (error) {
+                console.error("Resolving geolocation. Error:", error);
+
+                adDetails.current = {
+                    ...adDetails.current,
+                    location: null,
+                    geoLocation: geopoint,
+                    time: refs.time.current.value,
+                };
+            }
         }
     };
 
     return (
         <div id="fields-container">
-            <InputAddressLabeled
-                inputId="PetLocation"
-                type="text"
-                placeholder="Город, район, улица, поселок, место"
-                label="Где вы последний раз видели животное? *"
-                ref={refs.location}
-                defaultValue={adDetails.current.location}
-                value={adDetails.current.location}
-            />
+            <div id="fields-select-place">
+                <label>Где вы последний раз видели животное? *</label>
+                <div
+                    style={{
+                        display: "flex",
+                        gap: "1rem",
+                        alignItems: "center",
+                    }}
+                >
+                    <button
+                        disabled={placeSelection == "write"}
+                        className="primary-button"
+                        onClick={() => setPlaceSelection("write")}
+                    >
+                        Написать
+                    </button>
+                    <h3>или</h3>
+                    <button
+                        disabled={placeSelection == "map"}
+                        className="primary-button"
+                        onClick={() => setPlaceSelection("map")}
+                    >
+                        Указать на карте
+                    </button>
+                </div>
+            </div>
+            {placeSelection &&
+                (placeSelection == "write" ? (
+                    <InputAddress
+                        value={adDetails.current.location}
+                        ref={refs.location}
+                    />
+                ) : (
+                    <InputMap
+                        geopoint={geopoint}
+                        setGeopoint={setGeopoint}
+                        ref={refs.map}
+                    />
+                ))}
             <InputLabeled
                 inputId="PetTime"
                 type="text"
                 placeholder="дд.ММ.гггг чч:мм"
                 label="Когда вы потеряли или нашли животное? *"
                 ref={refs.time}
-                defaultValue={adDetails.current.time}
                 value={adDetails.current.time}
             />
+        </div>
+    );
+}
 
-            <div id="create-ad-map">
-                <YMap
-                    location={{ center: [37.617644, 55.755819], zoom: 9 }}
-                    style={{ width: "100%", height: "100%" }}
-                >
-                    <YMapDefaultSchemeLayer />
-                    <YMapDefaultFeaturesLayer />
-                    {/* <YMapMarker
-                        coordinates={[37.588144, 55.733842]}
-                        draggable={true}
-                    >
-                        <section>
-                            <h1>You can drag this header</h1>
-                        </section>
-                    </YMapMarker> */}
-                </YMap>
-            </div>
+function InputAddress({ value, ref }) {
+    const [text, setText] = useState(value);
+    useEffect(() => {
+        if (text.length <= 3) return;
+
+        const handler = setTimeout(() => {
+            async function getResponse() {
+                try {
+                    const response = await fetch(
+                        `https://suggest-maps.yandex.ru/v1/suggest?apikey=${
+                            import.meta.env.VITE_YMAPS_GEOSUGGEST_API_KEY
+                        }&text=${text}&results=5`
+                    );
+
+                    const data = await response.json();
+
+                    if (DEBUG)
+                        console.log(
+                            "Searching addresses. Data received:",
+                            data
+                        );
+                } catch (error) {
+                    console.error("Searching addresses. Error:", error);
+                }
+            }
+
+            getResponse();
+        }, 2000);
+
+        return () => clearTimeout(handler);
+    }, [text]);
+
+    return (
+        <input
+            id="input-address"
+            type="text"
+            placeholder="Город, район, улица, поселок, место"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            ref={ref}
+        />
+    );
+}
+
+function InputMap({ geopoint, setGeopoint, ref }) {
+    const [mapLocation, setMapLocation] = useState(
+        geopoint ? geopoint : [37.617644, 55.755819]
+    );
+    const [mapZoom, setMapZoom] = useState(9);
+
+    const handleClickMap = (e) => {
+        if (!e?.entity) return;
+
+        setMapLocation(e.center);
+        setMapZoom(e.zoom);
+        setGeopoint(e.entity.geometry.coordinates);
+    };
+
+    return (
+        <div id="create-ad-map" ref={ref}>
+            <YMap
+                location={{ center: mapLocation, zoom: mapZoom }}
+                style={{ width: "100%", height: "100%" }}
+            >
+                <YMapDefaultSchemeLayer />
+                <YMapDefaultFeaturesLayer />
+                {geopoint && (
+                    <YMapMarker coordinates={geopoint}>
+                        <div className="map-marker" />
+                    </YMapMarker>
+                )}
+                <YMapListener onClick={handleClickMap} />
+            </YMap>
         </div>
     );
 }

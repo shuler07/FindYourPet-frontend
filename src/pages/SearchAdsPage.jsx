@@ -1,6 +1,6 @@
 import "./SearchAdsPage.css";
 
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AppContext } from "../App";
 
 import Footer from "../components/Footer";
@@ -8,6 +8,13 @@ import Header from "../components/Header";
 import AdsContainer from "../components/AdsContainer";
 
 import { AD_INFO_DICT, AD_FILTERS_DICT, API_PATHS, DEBUG } from "../data";
+import {
+    YMap,
+    YMapDefaultSchemeLayer,
+    YMapDefaultFeaturesLayer,
+    YMapMarker,
+    YMapListener,
+} from "../ymaps";
 import { RestartAnim } from "../functions";
 
 export default function SearchAdsPage() {
@@ -20,7 +27,7 @@ export default function SearchAdsPage() {
     // Search
     const [searchText, setSearchText] = useState("");
     useEffect(() => {
-        const timeout = setTimeout(GetAds, 500);
+        const timeout = setTimeout(FilterAds, 500);
         return () => clearTimeout(timeout);
     }, [searchText]);
 
@@ -31,6 +38,9 @@ export default function SearchAdsPage() {
         breed: "any",
         size: "any",
         danger: "any",
+        region: "any",
+        geoloc: null,
+        radius: 1,
     });
     useEffect(() => {
         GetAds();
@@ -50,12 +60,18 @@ export default function SearchAdsPage() {
             }
         }
 
+        if (placeSection == "place") {
+            if (!changedFilters.geoloc || changedFilters.radius < 1)
+                flag = true;
+        }
+
         setApplyFiltersDisabled(flag);
     }, [changedFilters]);
 
     const [applyFiltersDisabled, setApplyFiltersDisabled] = useState(true);
 
     // Sidebar
+    const [placeSection, setPlaceSection] = useState("region");
     const [mobileView, setMobileView] = useState(window.innerWidth <= 768);
 
     window.addEventListener(
@@ -70,11 +86,22 @@ export default function SearchAdsPage() {
 
     const [sidebarOpened, setSidebarOpened] = useState(false);
 
+    // Geoloc
+    const [geolocOpened, setGeolocOpened] = useState(false);
+
     async function GetAds() {
         try {
             const filters = Object.fromEntries(
-                Object.entries(activeFilters).filter(([_, v]) => v != "any")
+                Object.entries(activeFilters).filter(
+                    ([k, v]) => v != "any" && !["geoloc", "radius"].includes(k)
+                )
             );
+
+            if (placeSection == "place") {
+                delete filters.region;
+                filters.geoloc = activeFilters.geoloc;
+                filters.radius = activeFilters.radius;
+            }
 
             const response = await fetch(API_PATHS.get_ads, {
                 method: "GET",
@@ -97,16 +124,21 @@ export default function SearchAdsPage() {
         }
     }
 
+    function FilterAds() {}
+
     return (
         <>
             <Header />
-            <div className="page-container" style={{ alignItems: "end" }}>
+            <div className="page-container" id="search-ads-page-container">
                 <SideBar
                     setActiveFilters={setActiveFilters}
                     changedFilters={changedFilters}
                     setChangedFilters={setChangedFilters}
                     applyFiltersDisabled={applyFiltersDisabled}
                     sidebarOpened={mobileView ? sidebarOpened : true}
+                    setGeolocOpened={setGeolocOpened}
+                    placeSection={placeSection}
+                    setPlaceSection={setPlaceSection}
                 />
                 <MainContainer
                     searchText={searchText}
@@ -116,6 +148,13 @@ export default function SearchAdsPage() {
                     setSidebarOpened={setSidebarOpened}
                 />
             </div>
+            {geolocOpened && (
+                <GeolocSelection
+                    location={activeFilters.geoloc}
+                    setGeolocOpened={setGeolocOpened}
+                    setChangedFilters={setChangedFilters}
+                />
+            )}
             <Footer />
         </>
     );
@@ -127,16 +166,27 @@ function SideBar({
     setChangedFilters,
     applyFiltersDisabled,
     sidebarOpened,
+    setGeolocOpened,
+    placeSection,
+    setPlaceSection,
 }) {
     const showElems = () => {
-        return Object.entries(changedFilters).map((value, index) => (
-            <SideBarElement
-                key={`keySidebarElement${index}`}
-                type={value[0]}
-                value={value[1]}
-                event={setChangedFilters}
-            />
-        ));
+        return Object.entries(changedFilters).map((value, index) => {
+            if (!["region", "geoloc", "radius"].includes(value[0])) {
+                return (
+                    <SideBarElement
+                        key={`keySidebarElement${index}`}
+                        type={value[0]}
+                        value={value[1]}
+                        event={setChangedFilters}
+                    />
+                );
+            }
+        });
+    };
+
+    const handleChangeRadius = (e) => {
+        setChangedFilters((prev) => ({ ...prev, radius: e.target.value }));
     };
 
     return (
@@ -146,6 +196,63 @@ function SideBar({
         >
             <h3>Фильтры</h3>
             {showElems()}
+            <div
+                id="switch-sidebar-place-section"
+                onClick={() =>
+                    setPlaceSection((prev) =>
+                        prev == "region" ? "place" : "region"
+                    )
+                }
+            >
+                <div
+                    id="switch-sidebar-place-section-active"
+                    className={placeSection == "place" ? "place" : ""}
+                />
+                <div className="switch-sidebar-place-section-element">
+                    <h6>Регион</h6>
+                </div>
+                <div className="switch-sidebar-place-section-element">
+                    <h6>Карта</h6>
+                </div>
+            </div>
+            {placeSection == "region" ? (
+                <SideBarElement
+                    type="region"
+                    value={changedFilters.region}
+                    event={setChangedFilters}
+                />
+            ) : (
+                <>
+                    <div className="sidebar-element">
+                        <label>Точка</label>
+                        <div
+                            className="sidebar-element-field"
+                            style={{ width: "calc(100% - 2rem)" }}
+                            onClick={() => setGeolocOpened(true)}
+                        >
+                            {changedFilters.geoloc
+                                ? `${changedFilters.geoloc[0].toFixed(
+                                      4
+                                  )} ${changedFilters.geoloc[1].toFixed(4)}`
+                                : "Не выбрана"}
+                        </div>
+                    </div>
+                    <div className="sidebar-element">
+                        <label>Радиус поиска {"(км)"}</label>
+                        <input
+                            className="sidebar-element-field"
+                            style={{
+                                width: "calc(100% - 2rem)",
+                                cursor: "text",
+                            }}
+                            type="number"
+                            placeholder="Не менее 1"
+                            value={changedFilters.radius}
+                            onChange={handleChangeRadius}
+                        />
+                    </div>
+                </>
+            )}
             <button
                 disabled={applyFiltersDisabled}
                 className="primary-button"
@@ -158,8 +265,6 @@ function SideBar({
 }
 
 function SideBarElement({ type, value, event }) {
-    const selectRef = useRef();
-
     const showOptions = () => {
         return Object.entries(AD_INFO_DICT[type]).map((value, index) => (
             <option key={`keyOption${type}${index}`} value={value[0]}>
@@ -168,8 +273,8 @@ function SideBarElement({ type, value, event }) {
         ));
     };
 
-    const handleChangeSelect = () => {
-        event((prev) => ({ ...prev, [type]: selectRef.current.value }));
+    const handleChangeSelect = (e) => {
+        event((prev) => ({ ...prev, [type]: e.target.value }));
     };
 
     return (
@@ -178,8 +283,7 @@ function SideBarElement({ type, value, event }) {
             <div>
                 <select
                     id={`${type}-${value}`}
-                    className="sidebar-element-select"
-                    ref={selectRef}
+                    className="sidebar-element-field"
                     value={value}
                     onChange={handleChangeSelect}
                 >
@@ -226,6 +330,75 @@ function SearchBar({ value, event }) {
                 value={value}
                 onChange={(e) => event(e.target.value.toLowerCase())}
             />
+        </div>
+    );
+}
+
+function GeolocSelection({ location, setGeolocOpened, setChangedFilters }) {
+    const mapRef = useRef();
+
+    const [mapLocation, setMapLocation] = useState(
+        location ? location : [37.617644, 55.755819]
+    );
+    const [mapZoom, setMapZoom] = useState(9);
+
+    const [geopoint, setGeopoint] = useState(location);
+
+    const handleClickMap = (e) => {
+        if (!e?.entity) return;
+
+        setMapLocation(e.center);
+        setMapZoom(e.zoom);
+        setGeopoint(e.entity.geometry.coordinates);
+    };
+
+    const handleClickApply = () => {
+        setChangedFilters((prev) => ({
+            ...prev,
+            geoloc: geopoint,
+        }));
+        setGeolocOpened(false);
+    };
+
+    return (
+        <div id="geoloc-container">
+            <div id="search-ads-map">
+                <YMap
+                    location={{ center: mapLocation, zoom: mapZoom }}
+                    style={{ width: "100%", height: "100%" }}
+                    ref={mapRef}
+                >
+                    <YMapDefaultSchemeLayer />
+                    <YMapDefaultFeaturesLayer />
+                    {geopoint && (
+                        <YMapMarker coordinates={geopoint}>
+                            <div className="map-marker" />
+                        </YMapMarker>
+                    )}
+                    <YMapListener onClick={handleClickMap} />
+                </YMap>
+            </div>
+            <div id="geoloc-window">
+                <button
+                    id="geoloc-button-back"
+                    className="primary-button geoloc-button"
+                    onClick={() => setGeolocOpened(false)}
+                >
+                    <img src="/icons/left-arrow.svg" />
+                    Вернуться
+                </button>
+                <div id="geoloc-center-window">
+                    <h3>Выберите место на карте</h3>
+                </div>
+                <button
+                    disabled={!geopoint}
+                    className="primary-button geoloc-button"
+                    onClick={handleClickApply}
+                >
+                    Применить
+                    <img src="/icons/right-arrow.svg" />
+                </button>
+            </div>
         </div>
     );
 }

@@ -178,10 +178,10 @@ function BackButton() {
     const navigate = useNavigate();
 
     return (
-        <div id="signin-back" onClick={() => navigate("/")}>
+        <button id="signin-back" className="primary-button" onClick={() => navigate("/")}>
             <img src="/icons/left-arrow.svg" />
-            <h6>На главную</h6>
-        </div>
+            На главную
+        </button>
     );
 }
 

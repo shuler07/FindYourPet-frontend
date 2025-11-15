@@ -78,11 +78,11 @@ h6 {
 }
 
 .primary-button {
-    padding: 0.5rem 2rem;
+    padding: .5rem 2rem;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 0.5rem;
+    gap: .5rem;
     background: var(--primary-color);
     font-family: system-ui;
     font-weight: bold;
@@ -91,7 +91,7 @@ h6 {
     border-radius: 1rem;
     color: white;
     cursor: pointer;
-    transition: all 0.5s ease;
+    transition: all .5s ease;
 }
 .primary-button:disabled {
     cursor: default;
@@ -106,7 +106,7 @@ h6 {
         var(--primary-button-color),
         var(--accent-color)
     );
-    transition: --primary-button-color 0.5s ease;
+    transition: --primary-button-color .5s ease;
 }
 .primary-button.gradient-primary:hover:not(:disabled) {
     --primary-button-color: var(--primary-light);
@@ -115,7 +115,7 @@ h6 {
 .primary-button > img {
     width: 1.5rem;
     height: 1.5rem;
-    transition: all 0.5s ease;
+    transition: all .5s ease;
 }
 .primary-button:hover:not(:disabled) img {
     translate: 2px 0;
@@ -147,6 +147,14 @@ h6 {
     gap: 2rem;
     position: relative;
     background: var(--secondary-color);
+}
+
+.map-marker {
+    width: 1rem;
+    height: 1rem;
+    border-radius: .5rem;
+    translate: -.5rem -.5rem;
+    background-color: #3aad3a;
 }
 
 

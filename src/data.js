@@ -48,6 +48,11 @@ export const AD_INFO_DICT = {
         unknown: "Опасен или нет неизвестно",
         any: "Любая",
     },
+    region: {
+        moscow_city: 'город Москва',
+        moscow: 'Московская обл.',
+        any: 'Любой'
+    },
 };
 
 export const AD_FILTERS_DICT = {
@@ -56,4 +61,7 @@ export const AD_FILTERS_DICT = {
     breed: "Порода",
     size: "Размер",
     danger: "Опасность",
+    region: 'Регион',
+    geoloc: 'Геолокация',
+    radius: 'Радиус поиска'
 };
