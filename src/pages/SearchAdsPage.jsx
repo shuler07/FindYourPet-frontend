@@ -45,6 +45,7 @@ export default function SearchAdsPage() {
     useEffect(() => {
         GetAds();
         setApplyFiltersDisabled(true);
+        console.log(activeFilters);
     }, [activeFilters]);
 
     const [changedFilters, setChangedFilters] = useState({ ...activeFilters });
@@ -104,7 +105,7 @@ export default function SearchAdsPage() {
             }
 
             const response = await fetch(API_PATHS.get_ads, {
-                method: "GET",
+                method: "POST",
                 body: JSON.stringify(filters),
                 headers: { "Content-Type": "application/json" },
             });
@@ -124,7 +125,49 @@ export default function SearchAdsPage() {
         }
     }
 
-    function FilterAds() {}
+    function FilterAds() {
+        const getSimilarity = (word, text) => {
+            const wordInd = 0,
+                maxCnt = 0;
+            for (let i = 0; i < text.length; i++) {
+                if (text[i] == word[wordInd]) {
+                    wordInd++;
+                    if (wordInd == word.length) {
+                        maxCnt = word.length;
+                        break;
+                    }
+                } else if (wordInd != 0) {
+                    if (wordInd > maxCnt) maxCnt = wordInd;
+                    wordInd = 0;
+                }
+            }
+            return word.length / maxCnt;
+        };
+
+        const words = searchText.split(" ");
+        const toCheck = [
+            "type",
+            "breed",
+            "size",
+            "danger",
+            "color",
+            "distincts",
+            "nickname",
+            "extras",
+        ];
+
+        setAds((prev) =>
+            prev.filter((ad) => {
+                words.forEach((word) => {
+                    toCheck.forEach((check) => {
+                        if (getSimilarity(word, ad[check]) > 0.6) {
+                            return True;
+                        }
+                    });
+                });
+            })
+        );
+    }
 
     return (
         <>
