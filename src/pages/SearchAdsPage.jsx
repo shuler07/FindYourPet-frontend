@@ -23,6 +23,9 @@ export default function SearchAdsPage() {
 
     // Ads
     const [ads, setAds] = useState([]);
+    useEffect(() => {
+        GetAds()
+    }, []);
 
     // Search
     const [searchText, setSearchText] = useState("");
@@ -42,9 +45,6 @@ export default function SearchAdsPage() {
         geoloc: null,
         radius: 1,
     });
-    useEffect(() => {
-        console.log(activeFilters);
-    }, [activeFilters]);
 
     // Sidebar
     const [placeSection, setPlaceSection] = useState("region");

@@ -535,8 +535,6 @@ function LocationFields({ validate, apply, adDetails }) {
 function InputAddress({ value, ref }) {
     const [text, setText] = useState(value);
     useEffect(() => {
-        if (text.length <= 3) return;
-
         const handler = setTimeout(() => {
             async function getResponse() {
                 try {
@@ -553,26 +551,76 @@ function InputAddress({ value, ref }) {
                             "Searching addresses. Data received:",
                             data
                         );
+
+                    if (data.results) setSuggests(data.results);
+                    else setSuggests([]);
                 } catch (error) {
                     console.error("Searching addresses. Error:", error);
+                    setSuggests([]);
                 }
             }
 
             getResponse();
-        }, 2000);
+        }, 1000);
+
+        setTimeout(() => {
+            if (text.length <= 3 || !ref.current.matches(":focus-visible")) {
+                setSuggests([]);
+                clearTimeout(handler);
+                return;
+            }
+        }, 5);
 
         return () => clearTimeout(handler);
     }, [text]);
 
+    const [suggests, setSuggests] = useState([]);
+
+    const getSuggests = () => {
+        return suggests.map((value, index) => {
+            const title = value.title.text;
+            const subtitle = value.subtitle?.text;
+
+            let suggestText = subtitle ? subtitle : title;
+            if (subtitle && title.length > subtitle.length) suggestText += `, ${title}`;
+
+            const suggestStyle = {
+                borderTopLeftRadius: index == 0 ? "1rem" : 0,
+                borderTopRightRadius: index == 0 ? "1rem" : 0,
+                borderBottomLeftRadius:
+                    index == suggests.length - 1 ? "1rem" : 0,
+                borderBottomRightRadius:
+                    index == suggests.length - 1 ? "1rem" : 0,
+            };
+
+            return (
+                <div
+                    key={`keySuggest${index}`}
+                    className="suggest-item"
+                    style={suggestStyle}
+                    onMouseDown={() => setText(suggestText)}
+                >
+                    {suggestText}
+                </div>
+            );
+        });
+    };
+
     return (
-        <input
-            id="input-address"
-            type="text"
-            placeholder="Город, район, улица, поселок, место"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            ref={ref}
-        />
+        <div>
+            <input
+                id="input-address"
+                type="text"
+                placeholder="Город, район, улица, поселок, место"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onBlur={() => setSuggests([])}
+                ref={ref}
+            />
+            {suggests.length > 0 && (
+                <div id="input-address-suggests-container">{getSuggests()}</div>
+            )}
+        </div>
     );
 }
 
