@@ -11,12 +11,15 @@ import { API_PATHS, DEBUG } from "../data";
 import { RestartAnim } from "../functions";
 
 export default function ProfilePage() {
-    const [user, setUser] = useState({
-        name: "",
-        date: "",
-        email: "",
-        phone: "",
-    });
+    const _name = window.localStorage.getItem("user_name"),
+        _date = window.localStorage.getItem("user_date"),
+        _email = window.localStorage.getItem("user_email"),
+        _phone = window.localStorage.getItem("user_phone");
+
+    const [userName, setUserName] = useState(_name ? _name : "");
+    const [userDate, setUserDate] = useState(_date ? _date : "");
+    const [userEmail, setUserEmail] = useState(_email ? _email : "");
+    const [userPhone, setUserPhone] = useState(_phone ? _phone : "");
     useEffect(() => {
         GetUser();
     }, []);
@@ -34,14 +37,24 @@ export default function ProfilePage() {
             const data = await response.json();
             if (DEBUG) console.debug("Getting user. Data received:", data);
 
-            if (data.user) setUser(data.user);
-
-            setUser({
-                name: "Test name",
-                date: "01.01.2025",
-                email: "some@email.com",
-                phone: "+7 (123) 456-78-90",
-            });
+            if (data.user) {
+                if (data.user.name != userName) {
+                    window.localStorage.setItem("user_name", data.user.name);
+                    setUserName(data.user.name);
+                }
+                if (data.user.date != userDate) {
+                    window.localStorage.setItem("user_date", data.user.date);
+                    setUserDate(data.user.date);
+                }
+                if (data.user.email != userEmail) {
+                    window.localStorage.setItem("user_email", data.user.email);
+                    setUserEmail(data.user.email);
+                }
+                if (data.user.phone != userPhone) {
+                    window.localStorage.setItem("user_phone", data.user.phone);
+                    setUserPhone(data.user.phone);
+                }
+            }
         } catch (error) {
             console.error("Getting user. Error occured:", error);
         }
@@ -51,13 +64,22 @@ export default function ProfilePage() {
         <>
             <Header />
             <div className="page-container">
-                <ProfileCard {...user} />
+                <ProfileCard
+                    name={userName}
+                    date={userDate}
+                    email={userEmail}
+                    phone={userPhone}
+                />
                 <AccountCard
-                    {...user}
+                    name={userName}
+                    setName={setUserName}
+                    email={userEmail}
+                    phone={userPhone}
+                    setPhone={setUserPhone}
                     setAlert={setAlert}
                     alertRef={alertRef}
                 />
-                <PostedPetsCard />
+                <PostedPetsCard setAlert={setAlert} alertRef={alertRef} />
                 <SettingsCard />
             </div>
             <Footer />
@@ -86,7 +108,7 @@ function ProfileCard({ name, date, email, phone }) {
                     </div>
                     <div className="profile-card-field">
                         <h6>Телефон</h6>
-                        <h3>{phone}</h3>
+                        <h3>{phone ? phone : "Не указан"}</h3>
                     </div>
                 </div>
             </div>
@@ -94,17 +116,27 @@ function ProfileCard({ name, date, email, phone }) {
     );
 }
 
-function AccountCard({ name, email, phone, setAlert, alertRef }) {
+function AccountCard({
+    name,
+    setName,
+    email,
+    phone,
+    setPhone,
+    setAlert,
+    alertRef,
+}) {
     return (
         <section id="account-card-section" className="card-section">
             <h5>Аккаунт</h5>
             <AccountNameField
                 _name={name}
+                setUserName={setName}
                 setAlert={setAlert}
                 alertRef={alertRef}
             />
             <AccountPhoneField
                 _phone={phone}
+                setUserPhone={setPhone}
                 setAlert={setAlert}
                 alertRef={alertRef}
             />
@@ -118,7 +150,7 @@ function AccountCard({ name, email, phone, setAlert, alertRef }) {
     );
 }
 
-function AccountNameField({ _name, setAlert, alertRef }) {
+function AccountNameField({ _name, setUserName, setAlert, alertRef }) {
     const editButtonRef = useRef();
 
     const [disabled, setDisabled] = useState(true);
@@ -140,13 +172,21 @@ function AccountNameField({ _name, setAlert, alertRef }) {
             if (DEBUG) console.debug("Changing name. Data received:", data);
 
             RestartAnim(alertRef.current);
-            if (data.success)
+            if (data.success) {
                 setAlert({ text: "Имя успешно изменено", color: "green" });
-            else setAlert({ text: "Попробуйте позже", color: "red" });
+                setUserName(name);
+            } else
+                setAlert({
+                    text: "Ошибка при изменении имени. Попробуйте позже",
+                    color: "red",
+                });
         } catch (error) {
             console.error("Changing name. Error occured:", error);
             RestartAnim(alertRef.current);
-            setAlert({ text: "Что-то пошло не так", color: "red" });
+            setAlert({
+                text: "Ошибка при изменении имени. Что-то пошло не так",
+                color: "red",
+            });
         }
     }
 
@@ -155,7 +195,17 @@ function AccountNameField({ _name, setAlert, alertRef }) {
             editButtonRef.current.classList.remove("disabled");
         } else {
             editButtonRef.current.classList.add("disabled");
-            ChangeName();
+            if (name == "" || name == _name) {
+                RestartAnim(alertRef.current);
+                if (name == "")
+                    setAlert({ text: "Имя слишком короткое", color: "red" });
+                else if (name == _name)
+                    setAlert({
+                        text: "Текущее имя совпадает с новым",
+                        color: 'red',
+                    });
+                setName(_name);
+            } else ChangeName();
         }
         setDisabled((prev) => !prev);
     };
@@ -184,7 +234,7 @@ function AccountNameField({ _name, setAlert, alertRef }) {
     );
 }
 
-function AccountPhoneField({ _phone, setAlert, alertRef }) {
+function AccountPhoneField({ _phone, setUserPhone, setAlert, alertRef }) {
     const editButtonRef = useRef();
 
     const [disabled, setDisabled] = useState(true);
@@ -206,13 +256,21 @@ function AccountPhoneField({ _phone, setAlert, alertRef }) {
             if (DEBUG) console.debug("Changing phone. Data received:", data);
 
             RestartAnim(alertRef.current);
-            if (data.success)
+            if (data.success) {
                 setAlert({ text: "Телефон успешно изменен", color: "green" });
-            else setAlert({ text: "Попробуйте позже", color: "red" });
+                setUserPhone(phone);
+            } else
+                setAlert({
+                    text: "Ошибка при изменении телефона. Попробуйте позже",
+                    color: "red",
+                });
         } catch (error) {
             console.error("Changing phone. Error occured:", error);
             RestartAnim(alertRef.current);
-            setAlert({ text: "Что-то пошло не так", color: "red" });
+            setAlert({
+                text: "Ошибка при изменении телефона. Что-то пошло не так",
+                color: "red",
+            });
         }
     }
 
@@ -221,7 +279,25 @@ function AccountPhoneField({ _phone, setAlert, alertRef }) {
             editButtonRef.current.classList.remove("disabled");
         } else {
             editButtonRef.current.classList.add("disabled");
-            ChangePhone();
+            if (
+                phone.length != 12 ||
+                !phone.startsWith("+7") ||
+                phone == _phone
+            ) {
+                RestartAnim(alertRef.current);
+                if (phone.length != 12 || !phone.startsWith("+7"))
+                    setAlert({
+                        text: "Неверный формат телефона",
+                        color: "red",
+                    });
+                else if (phone == _phone)
+                    setAlert({
+                        text: "Текущий телефон совпадает с новым",
+                        color: "red",
+                    });
+                setPhone(_phone);
+                setAlert({ text: "Неверный формат телефона", color: "red" });
+            } else ChangePhone();
         }
         setDisabled((prev) => !prev);
     };
@@ -233,9 +309,9 @@ function AccountPhoneField({ _phone, setAlert, alertRef }) {
                 <input
                     className="account-edit-input"
                     type="phone"
-                    placeholder={_phone}
+                    placeholder={_phone ? _phone : "Не указан"}
                     disabled={disabled}
-                    value={phone}
+                    value={phone ? phone : ""}
                     onChange={(e) => setPhone(e.target.value)}
                 />
                 <div
@@ -277,12 +353,23 @@ function AccountEmailField({ _email, setAlert, alertRef }) {
             RestartAnim(alertRef.current);
             if (data.success) {
                 setSignedIn(false);
+                window.localStorage.removeItem("user_name");
+                window.localStorage.removeItem("user_date");
+                window.localStorage.removeItem("user_email");
+                window.localStorage.removeItem("user_phone");
                 window.location.pathname = "/";
-            } else setAlert({ text: "Попробуйте позже", color: "red" });
+            } else
+                setAlert({
+                    text: "Ошибка при изменении почты. Попробуйте позже",
+                    color: "red",
+                });
         } catch (error) {
             console.error("Changing email. Error occured:", error);
             RestartAnim(alertRef.current);
-            setAlert({ text: "Что-то пошло не так", color: "red" });
+            setAlert({
+                text: "Ошибка при изменении почты. Что-то пошло не так",
+                color: "red",
+            });
         }
     }
 
@@ -291,7 +378,14 @@ function AccountEmailField({ _email, setAlert, alertRef }) {
             editButtonRef.current.classList.remove("disabled");
         } else {
             editButtonRef.current.classList.add("disabled");
-            ChangeEmail();
+            if (email == "" || !email.includes("@") || email == _email) {
+                RestartAnim(alertRef.current);
+                if (email == "" || !email.includes("@"))
+                    setAlert({ text: "Неверный формат почты", color: "red" });
+                else if (email == _email)
+                    setAlert({ text: "Текущая почта совпадает с новой", color: 'red' });
+                setEmail(_email);
+            } else ChangeEmail();
         }
         setDisabled((prev) => !prev);
     };
@@ -347,7 +441,10 @@ function AccountPasswordField({ setAlert, alertRef }) {
         } catch (error) {
             console.error("Changing password. Error occured:", error);
             RestartAnim(alertRef.current);
-            setAlert({ text: "Что-то пошло не так", color: "red" });
+            setAlert({
+                text: "Ошибка при изменении пароля. Что-то пошло не так",
+                color: "red",
+            });
         }
     }
 
@@ -356,7 +453,25 @@ function AccountPasswordField({ setAlert, alertRef }) {
             editButtonRef.current.classList.remove("disabled");
         } else {
             editButtonRef.current.classList.add("disabled");
-            ChangePassword();
+            if (
+                curPassword.length < 8 ||
+                newPassword.length < 8 ||
+                curPassword == newPassword
+            ) {
+                RestartAnim(alertRef.current);
+                if (curPassword.length < 8 || newPassword.length < 8)
+                    setAlert({
+                        text: "Минимальная длина пароля - 8 символов",
+                        color: "red",
+                    });
+                else if (curPassword == newPassword)
+                    setAlert({
+                        text: "Текущий и новый пароль совпадают",
+                        color: "red",
+                    });
+                setCurPassword("");
+                setNewPassword("");
+            } else ChangePassword();
         }
         setDisabled((prev) => !prev);
     };
@@ -367,7 +482,8 @@ function AccountPasswordField({ setAlert, alertRef }) {
             <div style={{ position: "relative" }}>
                 <input
                     className="account-edit-input"
-                    type="current-password"
+                    type="password"
+                    autoComplete="current-password"
                     placeholder="Текущий пароль"
                     disabled={disabled}
                     value={curPassword}
@@ -388,7 +504,7 @@ function AccountPasswordField({ setAlert, alertRef }) {
                         width: "calc(100% - 1.5rem)",
                     }}
                     className="account-edit-input"
-                    type="new-password"
+                    type="password"
                     placeholder="Новый пароль"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
@@ -398,7 +514,7 @@ function AccountPasswordField({ setAlert, alertRef }) {
     );
 }
 
-function PostedPetsCard() {
+function PostedPetsCard({ setAlert, alertRef }) {
     const [myAds, setMyAds] = useState([]);
     useEffect(() => {
         GetMyAds();
@@ -418,12 +534,18 @@ function PostedPetsCard() {
             if (data.success) setMyAds(data.ads);
             else {
                 RestartAnim(alertRef.current);
-                setAlert({ text: "Попробуйте позже", color: "red" });
+                setAlert({
+                    text: "Ошибка при получении ваших объявлений. Попробуйте позже",
+                    color: "red",
+                });
             }
         } catch (error) {
             console.error("Getting my ads. Error occured:", error);
             RestartAnim(alertRef.current);
-            setAlert({ text: "Что-то пошло не так", color: "red" });
+            setAlert({
+                text: "Ошибка при получении ваших объявлений. Что-то пошло не так",
+                color: "red",
+            });
         }
     }
 

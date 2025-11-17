@@ -24,12 +24,14 @@ export default function SearchAdsPage() {
     // Ads
     const [ads, setAds] = useState([]);
     useEffect(() => {
-        GetAds()
+        GetAds();
     }, []);
 
     // Search
     const [searchText, setSearchText] = useState("");
     useEffect(() => {
+        if (searchText == "") return;
+
         const timeout = setTimeout(FilterAds, 500);
         return () => clearTimeout(timeout);
     }, [searchText]);
@@ -81,6 +83,7 @@ export default function SearchAdsPage() {
 
             const response = await fetch(API_PATHS.get_ads, {
                 method: "POST",
+                credentials: "include",
                 body: JSON.stringify(filters),
                 headers: { "Content-Type": "application/json" },
             });
@@ -102,21 +105,16 @@ export default function SearchAdsPage() {
 
     function FilterAds() {
         const getSimilarity = (word, text) => {
-            const wordInd = 0,
+            let wordInd = 0,
                 maxCnt = 0;
             for (let i = 0; i < text.length; i++) {
                 if (text[i] == word[wordInd]) {
                     wordInd++;
-                    if (wordInd == word.length) {
-                        maxCnt = word.length;
-                        break;
-                    }
-                } else if (wordInd != 0) {
-                    if (wordInd > maxCnt) maxCnt = wordInd;
-                    wordInd = 0;
-                }
+                    maxCnt = wordInd > maxCnt ? wordInd : maxCnt;
+                } else wordInd = 0;
             }
-            return word.length / maxCnt;
+            console.log('res:', maxCnt / word.length);
+            return maxCnt / word.length;
         };
 
         const words = searchText.split(" ");
@@ -133,13 +131,17 @@ export default function SearchAdsPage() {
 
         setAds((prev) =>
             prev.filter((ad) => {
-                words.forEach((word) => {
-                    toCheck.forEach((check) => {
-                        if (getSimilarity(word, ad[check]) > 0.6) {
-                            return True;
-                        }
-                    });
-                });
+                let flag = false;
+                for (let i = 0; i < words.length; i++) {
+                    for (let j = 0; j < toCheck.length; j++) {
+                        if (getSimilarity(words[i], ad[toCheck[j]]) > 0.6) {
+                            flag = true;
+                            break;
+                        };
+                    };
+                    if (flag) break;
+                };
+                return flag;
             })
         );
     }

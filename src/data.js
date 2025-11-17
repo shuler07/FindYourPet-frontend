@@ -5,16 +5,16 @@ export const API_PATHS = {
     register: API_BASENAME + "/register",
     login: API_BASENAME + "/login",
     logout: API_BASENAME + "/logout",
-    user: API_BASENAME + "/todo",
+    user: API_BASENAME + "/user",
 
-    create_ad: API_BASENAME + "/todo",
-    get_ads: API_BASENAME + "/todo",
+    create_ad: API_BASENAME + "/ads/create",
+    get_ads: API_BASENAME + "/ads/get",
     get_my_ads: API_BASENAME + "/todo",
 
-    change_name: API_BASENAME + "/todo",
-    change_phone: API_BASENAME + "/todo",
-    change_email: API_BASENAME + "/todo",
-    change_password: API_BASENAME + "/todo",
+    change_name: API_BASENAME + "/user/name",
+    change_phone: API_BASENAME + "/user/phone",
+    change_email: API_BASENAME + "/user/email",
+    change_password: API_BASENAME + "/user/password",
 };
 
 export const DEBUG = true;

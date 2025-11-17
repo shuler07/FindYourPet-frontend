@@ -57,10 +57,10 @@ export default function CreateAdPage() {
             return;
         }
 
-        if (activeStage != 3) {
-            await applyFieldsFunc.current();
-            setActiveStage((prev) => prev + 1);
-        } else CreateAd();
+        await applyFieldsFunc.current();
+        
+        if (activeStage != 3) setActiveStage((prev) => prev + 1);
+        else CreateAd();
     };
 
     async function CreateAd() {
