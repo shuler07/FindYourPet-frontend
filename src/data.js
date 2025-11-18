@@ -8,7 +8,7 @@ export const API_PATHS = {
     user: API_BASENAME + "/user",
 
     create_ad: API_BASENAME + "/ads/create",
-    get_ads: API_BASENAME + "/ads/get",
+    get_ads: API_BASENAME + "/ads",
     get_my_ads: API_BASENAME + "/todo",
 
     change_name: API_BASENAME + "/user/name",

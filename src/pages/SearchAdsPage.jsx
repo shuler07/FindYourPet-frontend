@@ -81,6 +81,8 @@ export default function SearchAdsPage() {
                 filters.radius = activeFilters.radius;
             }
 
+            console.log(filters);
+
             const response = await fetch(API_PATHS.get_ads, {
                 method: "POST",
                 credentials: "include",

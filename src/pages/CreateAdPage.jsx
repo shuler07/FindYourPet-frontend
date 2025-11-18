@@ -35,7 +35,7 @@ export default function CreateAdPage() {
         nickname: "", // pet nickname (unneccessary)
         danger: "", // ONLY danger / safe / unknown
         location: "", // place in words
-        geoLocation: null, // place in coords
+        geoLocation: [], // place in coords
         time: "", // time in dd.MM.yyyy hh:mm:ss
         contactName: "", // contact name of creator
         contactPhone: "", // contact phone of creator
@@ -425,7 +425,7 @@ function LocationFields({ validate, apply, adDetails }) {
                 adDetails.current = {
                     ...adDetails.current,
                     location: refs.location.current.value,
-                    geoLocation: null,
+                    geoLocation: [],
                     time: refs.time.current.value,
                 };
             }
@@ -471,7 +471,7 @@ function LocationFields({ validate, apply, adDetails }) {
 
                 adDetails.current = {
                     ...adDetails.current,
-                    location: null,
+                    location: '',
                     geoLocation: geopoint,
                     time: refs.time.current.value,
                 };
