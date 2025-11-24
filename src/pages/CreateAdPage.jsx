@@ -18,6 +18,8 @@ import {
     YMapDefaultFeaturesLayer,
     YMapMarker,
     YMapListener,
+    getGeoLocationOrAddress,
+    getSuggestsByText
 } from "../ymaps";
 import { ApiCreateAd } from "../apiRequests";
 import { useNavigate } from "react-router-dom";
@@ -345,7 +347,7 @@ function LocationFields({ validate, apply, adDetails }) {
         map: useRef(),
         time: useRef(),
     };
-    const [geopoint, setGeopoint] = useState(adDetails.current.geoLocation);
+    const [geoLocation, setGeoLocation] = useState(adDetails.current.geoLocation);
 
     const [placeSelection, setPlaceSelection] = useState("write");
 
@@ -363,7 +365,7 @@ function LocationFields({ validate, apply, adDetails }) {
                 flag = false;
             } else refs.location.current.classList.remove("wrong-field");
         } else {
-            if (!geopoint) {
+            if (!geoLocation) {
                 refs.map.current.classList.add("wrong-field");
                 flag = false;
             } else refs.map.current.classList.remove("wrong-field");
@@ -374,32 +376,9 @@ function LocationFields({ validate, apply, adDetails }) {
 
     apply.current = async () => {
         if (placeSelection == "write") {
-            async function getGeolocation() {
-                try {
-                    const response = await fetch(
-                        `https://geocode-maps.yandex.ru/v1/?apikey=${
-                            import.meta.env.VITE_YMAPS_API_KEY
-                        }&geocode=${refs.location.current.value.replaceAll(
-                            " ",
-                            "+"
-                        )}&format=json`
-                    );
+            const address = refs.location.current.value.replaceAll(" ", "+");
 
-                    const data = await response.json();
-
-                    if (DEBUG)
-                        console.debug(
-                            "Getting geolocation. Data received:",
-                            data
-                        );
-
-                    return data;
-                } catch (error) {
-                    console.error("Getting geolocation. Error:", error);
-                }
-            }
-
-            const data = await getGeolocation();
+            const data = await getGeoLocationOrAddress(address);
 
             try {
                 const geoLocation =
@@ -431,31 +410,12 @@ function LocationFields({ validate, apply, adDetails }) {
                 };
             }
         } else {
-            async function getAddress() {
-                try {
-                    const response = await fetch(
-                        `https://geocode-maps.yandex.ru/v1/?apikey=${
-                            import.meta.env.VITE_YMAPS_API_KEY
-                        }&geocode=${geopoint}&format=json`
-                    );
-
-                    const data = await response.json();
-
-                    if (DEBUG)
-                        console.debug("Getting address. Data received:", data);
-
-                    return data;
-                } catch (error) {
-                    console.error("Getting address. Error:", error);
-                }
-            }
-
-            const data = await getAddress();
+            const data = await getGeoLocationOrAddress(geoLocation);
 
             try {
                 const address =
                     data.response.GeoObjectCollection.featureMember[0].GeoObject
-                        .Point.pos;
+                        .description;
 
                 if (DEBUG) {
                     console.debug("Resolving address. Data received:", address);
@@ -464,16 +424,16 @@ function LocationFields({ validate, apply, adDetails }) {
                 adDetails.current = {
                     ...adDetails.current,
                     location: address,
-                    geoLocation: geopoint,
+                    geoLocation: geoLocation,
                     time: refs.time.current.value,
                 };
             } catch (error) {
-                console.error("Resolving geolocation. Error:", error);
+                console.error("Resolving address. Error:", error);
 
                 adDetails.current = {
                     ...adDetails.current,
                     location: "",
-                    geoLocation: geopoint,
+                    geoLocation: geoLocation,
                     time: refs.time.current.value,
                 };
             }
@@ -516,8 +476,8 @@ function LocationFields({ validate, apply, adDetails }) {
                     />
                 ) : (
                     <InputMap
-                        geopoint={geopoint}
-                        setGeopoint={setGeopoint}
+                        geoLocation={geoLocation}
+                        setGeoLocation={setGeoLocation}
                         ref={refs.map}
                     />
                 ))}
@@ -536,32 +496,11 @@ function LocationFields({ validate, apply, adDetails }) {
 function InputAddress({ value, ref }) {
     const [text, setText] = useState(value);
     useEffect(() => {
-        const handler = setTimeout(() => {
-            async function getResponse() {
-                try {
-                    const response = await fetch(
-                        `https://suggest-maps.yandex.ru/v1/suggest?apikey=${
-                            import.meta.env.VITE_YMAPS_GEOSUGGEST_API_KEY
-                        }&text=${text}&results=5`
-                    );
+        const handler = setTimeout(async () => {
+            const data = await getSuggestsByText(text);
 
-                    const data = await response.json();
-
-                    if (DEBUG)
-                        console.log(
-                            "Searching addresses. Data received:",
-                            data
-                        );
-
-                    if (data.results) setSuggests(data.results);
-                    else setSuggests([]);
-                } catch (error) {
-                    console.error("Searching addresses. Error:", error);
-                    setSuggests([]);
-                }
-            }
-
-            getResponse();
+            if (data.results) setSuggests(data.results);
+            else setSuggests([]);
         }, 1000);
 
         setTimeout(() => {
@@ -626,10 +565,10 @@ function InputAddress({ value, ref }) {
     );
 }
 
-function InputMap({ geopoint, setGeopoint, ref }) {
+function InputMap({ geoLocation, setGeoLocation, ref }) {
     const [mapLoaded, setMapLoaded] = useState(false);
     const [mapLocation, setMapLocation] = useState(
-        geopoint.length != 0 ? geopoint : [37.617644, 55.755819]
+        geoLocation.length != 0 ? geoLocation : [37.617644, 55.755819]
     );
     const [mapZoom, setMapZoom] = useState(9);
 
@@ -640,7 +579,7 @@ function InputMap({ geopoint, setGeopoint, ref }) {
 
         setMapLocation(e.center);
         setMapZoom(e.zoom);
-        setGeopoint(e.entity.geometry.coordinates);
+        setGeoLocation(e.entity.geometry.coordinates);
     };
 
     return (
@@ -652,8 +591,8 @@ function InputMap({ geopoint, setGeopoint, ref }) {
                 >
                     <YMapDefaultSchemeLayer />
                     <YMapDefaultFeaturesLayer />
-                    {geopoint && (
-                        <YMapMarker coordinates={geopoint}>
+                    {geoLocation && (
+                        <YMapMarker coordinates={geoLocation}>
                             <div className="map-marker" />
                         </YMapMarker>
                     )}
