@@ -28,10 +28,16 @@ export default function SearchAdsPage() {
         GetAds();
     }, []);
 
+    const [filteredAds, setFilteredAds] = useState([]);
+    useEffect(() => {
+        setSearchText("");
+        setFilteredAds(ads);
+    }, [ads]);
+
     // Search
     const [searchText, setSearchText] = useState("");
     useEffect(() => {
-        if (searchText == "") return;
+        if (searchText == "" && ads.length == filteredAds.length) return;
 
         const timeout = setTimeout(FilterAds, 500);
         return () => clearTimeout(timeout);
@@ -97,11 +103,16 @@ export default function SearchAdsPage() {
     }
 
     function FilterAds() {
+        if (searchText == "") {
+            setFilteredAds(ads);
+            return;
+        }
+
         const getSimilarity = (word, text) => {
             let wordInd = 0,
                 maxCnt = 0;
             for (let i = 0; i < text.length; i++) {
-                if (text[i] == word[wordInd]) {
+                if (text[i].toLowerCase() == word[wordInd]) {
                     wordInd++;
                     maxCnt = wordInd > maxCnt ? wordInd : maxCnt;
                 } else wordInd = 0;
@@ -110,23 +121,19 @@ export default function SearchAdsPage() {
         };
 
         const words = searchText.split(" ");
-        const toCheck = [
-            "type",
-            "breed",
-            "size",
-            "danger",
-            "color",
-            "distincts",
-            "nickname",
-            "extras",
-        ];
+        const toCheckFromDict = ["type", "breed", "size", "danger"];
+        const toCheck = ["color", "distincts", "nickname", "extras"];
 
-        setAds((prev) =>
-            prev.filter((ad) => {
+        setFilteredAds(
+            ads.filter((ad) => {
                 let flag = false;
                 for (let i = 0; i < words.length; i++) {
                     for (let j = 0; j < toCheck.length; j++) {
                         if (getSimilarity(words[i], ad[toCheck[j]]) > 0.6) {
+                            flag = true;
+                            break;
+                        }
+                        if (getSimilarity(words[i], AD_INFO_DICT[toCheckFromDict[j]][ad[toCheckFromDict[j]]]) > 0.6) {
                             flag = true;
                             break;
                         }
@@ -155,7 +162,7 @@ export default function SearchAdsPage() {
                 <MainContainer
                     searchText={searchText}
                     setSearchText={setSearchText}
-                    ads={ads}
+                    ads={filteredAds}
                     mobileView={mobileView}
                     setSidebarOpened={setSidebarOpened}
                 />
