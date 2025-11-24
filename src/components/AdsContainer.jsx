@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 import { AD_INFO_DICT } from "../data";
 
-export default function AdsContainer({ ads }) {
+export default function AdsContainer({ ads, inProfile }) {
     const showAds = () => {
         return ads.map((value, index) => (
             <AdCard
@@ -30,7 +30,7 @@ export default function AdsContainer({ ads }) {
               }
             : {
                   width: "100%",
-                  height: 'calc(100dvh - 10.5rem)',
+                  height: inProfile ? '16rem' : 'calc(100dvh - 10.5rem)',
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",

@@ -340,7 +340,7 @@ function MainContainer({
                     </div>
                 )}
             </div>
-            <AdsContainer ads={ads} />
+            <AdsContainer ads={ads} inProfile={false} />
         </div>
     );
 }

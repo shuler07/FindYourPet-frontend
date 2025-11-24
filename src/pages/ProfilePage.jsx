@@ -516,7 +516,7 @@ function PostedPetsCard({ CallAlert }) {
                     {myAds.length}
                 </span>
             </h5>
-            <AdsContainer ads={myAds} />
+            <AdsContainer ads={myAds} inProfile={true} />
         </section>
     );
 }
