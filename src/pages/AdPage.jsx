@@ -81,7 +81,7 @@ function PetInfo({
 }) {
     const nicknameText = nickname != "" ? nickname : "Кличка неизвестна";
     const distinctsText = distincts != "" ? distincts : "Не указаны";
-    const extrasText = extras != "" ? extras : 'Не указана';
+    const extrasText = extras != "" ? extras : "Не указана";
     const styledInfoStatus = {
         backgroundColor: status == "lost" ? "#f53535" : "#1fcf1f",
     };
@@ -195,15 +195,41 @@ function PetPlace({ location, geoLocation }) {
                 </h6>
             </div>
             <div id="ad-place-map">
-                {mapLoaded && (
-                    <YMap location={{ center: geoLocation, zoom: 9 }}>
-                        <YMapDefaultSchemeLayer />
-                        <YMapDefaultFeaturesLayer />
-                        <YMapMarker coordinates={geoLocation}>
-                            <div className="map-marker" />
-                        </YMapMarker>
-                    </YMap>
-                )}
+                {mapLoaded &&
+                    (geoLocation.length != 0 ? (
+                        <YMap location={{ center: geoLocation, zoom: 9 }}>
+                            <YMapDefaultSchemeLayer />
+                            <YMapDefaultFeaturesLayer />
+                            <YMapMarker coordinates={geoLocation}>
+                                <div className="map-marker" />
+                            </YMapMarker>
+                        </YMap>
+                    ) : (
+                        <div
+                            style={{
+                                width: "100%",
+                                height: "100%",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                position: 'relative'
+                            }}
+                        >
+                            <div
+                                style={{
+                                    background: "url('/images/russia_map_outline.png') center / cover",
+                                    position: "absolute",
+                                    top: 0,
+                                    left: 0,
+                                    width: "100%",
+                                    height: "100%",
+                                    opacity: .7,
+                                    maskImage: "radial-gradient(ellipse, white, transparent 75%)"
+                                }}
+                            />
+                            <h2 style={{ zIndex: 1 }}>Карта недоступна</h2>
+                        </div>
+                    ))}
             </div>
         </section>
     );
