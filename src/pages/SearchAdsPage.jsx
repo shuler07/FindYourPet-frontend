@@ -7,19 +7,20 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import AdsContainer from "../components/AdsContainer";
 
-import { AD_INFO_DICT, AD_FILTERS_DICT, API_PATHS, DEBUG } from "../data";
+import { AD_INFO_DICT, AD_FILTERS_DICT } from "../data";
 import {
+    ymapsInitPromise,
     YMap,
     YMapDefaultSchemeLayer,
     YMapDefaultFeaturesLayer,
     YMapMarker,
     YMapListener,
 } from "../ymaps";
-import { RestartAnim } from "../functions";
+import { ApiGetAds } from "../apiRequests";
 
 export default function SearchAdsPage() {
     // Alert
-    const { setAlert, alertRef } = useContext(AppContext);
+    const { CallAlert } = useContext(AppContext);
 
     // Ads
     const [ads, setAds] = useState([]);
@@ -68,41 +69,26 @@ export default function SearchAdsPage() {
     const [geolocOpened, setGeolocOpened] = useState(false);
 
     async function GetAds() {
-        try {
-            const filters = Object.fromEntries(
-                Object.entries(activeFilters).filter(
-                    ([k, v]) => v != "any" && !["geoloc", "radius"].includes(k)
-                )
-            );
+        const filters = Object.fromEntries(
+            Object.entries(activeFilters).filter(
+                ([k, v]) => v != "any" && !["geoloc", "radius"].includes(k)
+            )
+        );
 
-            if (placeSection == "place") {
-                delete filters.region;
-                filters.geoloc = activeFilters.geoloc;
-                filters.radius = activeFilters.radius;
-            }
-
-            console.log(filters);
-
-            const response = await fetch(API_PATHS.get_ads, {
-                method: "POST",
-                credentials: "include",
-                body: JSON.stringify(filters),
-                headers: { "Content-Type": "application/json" },
-            });
-
-            const data = await response.json();
-            if (DEBUG) console.debug("Getting ads. Data received:", data);
-
-            if (data.success) setAds(data.ads);
-            else {
-                RestartAnim(alertRef.current);
-                setAlert({ text: "Попробуйте позже", color: "red" });
-            }
-        } catch (error) {
-            console.error("Getting ads. Error:", error);
-            RestartAnim(alertRef.current);
-            setAlert({ text: "Что-то пошло не так", color: "red" });
+        if (placeSection == "place") {
+            delete filters.region;
+            filters.geoloc = activeFilters.geoloc;
+            filters.radius = activeFilters.radius;
         }
+
+        const data = await ApiGetAds(filters);
+
+        if (data.success) setAds(data.ads);
+        else if (data.error)
+            CallAlert(
+                "Ошибка при загрузке объявлений. Попробуйте позже",
+                "red"
+            );
     }
 
     function FilterAds() {
@@ -115,7 +101,6 @@ export default function SearchAdsPage() {
                     maxCnt = wordInd > maxCnt ? wordInd : maxCnt;
                 } else wordInd = 0;
             }
-            console.log('res:', maxCnt / word.length);
             return maxCnt / word.length;
         };
 
@@ -139,10 +124,10 @@ export default function SearchAdsPage() {
                         if (getSimilarity(words[i], ad[toCheck[j]]) > 0.6) {
                             flag = true;
                             break;
-                        };
-                    };
+                        }
+                    }
                     if (flag) break;
-                };
+                }
                 return flag;
             })
         );
@@ -360,6 +345,9 @@ function SearchBar({ value, event }) {
 
 function GeolocSelection({ location, setGeolocOpened, setActiveFilters }) {
     const mapRef = useRef();
+    const [mapLoaded, setMapLoaded] = useState(false);
+
+    ymapsInitPromise.then(() => setMapLoaded(true));
 
     const [mapLocation, setMapLocation] = useState(
         location ? location : [37.617644, 55.755819]
@@ -387,20 +375,22 @@ function GeolocSelection({ location, setGeolocOpened, setActiveFilters }) {
     return (
         <div id="geoloc-container">
             <div id="search-ads-map">
-                <YMap
-                    location={{ center: mapLocation, zoom: mapZoom }}
-                    style={{ width: "100%", height: "100%" }}
-                    ref={mapRef}
-                >
-                    <YMapDefaultSchemeLayer />
-                    <YMapDefaultFeaturesLayer />
-                    {geopoint && (
-                        <YMapMarker coordinates={geopoint}>
-                            <div className="map-marker" />
-                        </YMapMarker>
-                    )}
-                    <YMapListener onClick={handleClickMap} />
-                </YMap>
+                {mapLoaded && (
+                    <YMap
+                        location={{ center: mapLocation, zoom: mapZoom }}
+                        style={{ width: "100%", height: "100%" }}
+                        ref={mapRef}
+                    >
+                        <YMapDefaultSchemeLayer />
+                        <YMapDefaultFeaturesLayer />
+                        {geopoint && (
+                            <YMapMarker coordinates={geopoint}>
+                                <div className="map-marker" />
+                            </YMapMarker>
+                        )}
+                        <YMapListener onClick={handleClickMap} />
+                    </YMap>
+                )}
             </div>
             <div id="geoloc-window">
                 <button

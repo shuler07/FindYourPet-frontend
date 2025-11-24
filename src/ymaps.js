@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import React from "react";
 import ReactDOM from 'react-dom'
 
 export let reactify, YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMapMarker, YMapListener;
@@ -6,7 +6,7 @@ export let reactify, YMap, YMapDefaultSchemeLayer, YMapDefaultFeaturesLayer, YMa
 const ymaps_script = document.createElement('script');
 ymaps_script.src = `https://api-maps.yandex.ru/v3/?apikey=${import.meta.env.VITE_YMAPS_API_KEY}&lang=ru_RU`;
 
-const ymapsInitPromise = new Promise((resolve) => {
+export const ymapsInitPromise = new Promise((resolve) => {
     ymaps_script.onload = async () => {
         const [ymaps3React] = await Promise.all([
             ymaps3.import('@yandex/ymaps3-reactify'),

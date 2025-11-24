@@ -112,6 +112,20 @@ h6 {
     --primary-button-color: var(--primary-light);
 }
 
+.primary-button.red {
+    background-color: #e44a4a;
+}
+.primary-button.red:hover:not(:disabled) {
+    background-color: #ed6868;
+}
+
+.primary-button.bright-red {
+    background-color: #ff3030;
+}
+.primary-button.bright-red:hover:not(:disabled) {
+    background-color: #e44a4a;
+}
+
 .primary-button > img {
     width: 1.25rem;
     height: 1.25rem;

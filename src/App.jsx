@@ -12,56 +12,42 @@ import AdPage from "./pages/AdPage";
 import AuthorsPage from "./pages/AuthorsPage";
 import ProfilePage from "./pages/ProfilePage";
 
-import { API_PATHS, DEBUG } from "./data";
+import { ApiCheckAuth, ApiRefreshAuth } from "./apiRequests";
+import { RestartAnim } from "./functions";
 
 export const AppContext = createContext();
 
 export default function App() {
-    const [signedIn, setSignedIn] = useState(false);
+    const [signedIn, setSignedIn] = useState(true);
     useEffect(() => {
-        CheckAuth();
+        // CheckAuth();
     }, []);
 
     const [alert, setAlert] = useState({ text: null, color: null });
     const alertRef = useRef();
 
+    function CallAlert(text, color) {
+        RestartAnim(alertRef.current);
+        setAlert({ text, color });
+    }
+
     async function CheckAuth() {
-        try {
-            const response = await fetch(API_PATHS.auth, {
-                method: "GET",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-            });
+        const data = await ApiCheckAuth();
 
-            const data = await response.json();
-            if (DEBUG) console.debug("Authentication. Data received:", data);
-
-            if (data.success) setSignedIn(true);
-            else {
-                if (data.detail == "Токен недействителен или истёк") {
-                    RefreshAuth();
-                }
-            }
-        } catch (error) {
-            console.error("Authentication. Error occured:", error);
+        if (data.success) setSignedIn(true);
+        else {
+            if (data.detail == "Токен недействителен или истёк") RefreshAuth();
+            if (data.error)
+                CallAlert("Ошибка при аутентификации. Попробуйте позже", "red");
         }
     }
 
     async function RefreshAuth() {
-        try {
-            const response = await fetch(API_PATHS.refresh, {
-                method: "GET",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-            });
+        const data = await ApiRefreshAuth();
 
-            const data = await response.json();
-            if (DEBUG) console.debug("Refreshing. Data received:", data);
-
-            if (data.success) setSignedIn(true);
-        } catch (error) {
-            console.error("Refreshing. Error occured:", error);
-        }
+        if (data.success) setSignedIn(true);
+        else if (data.error)
+            CallAlert("Ошибка при аутентфикации. Попробуйте позже", "red");
     }
 
     return (
@@ -69,8 +55,7 @@ export default function App() {
             value={{
                 signedIn,
                 setSignedIn,
-                setAlert,
-                alertRef,
+                CallAlert,
             }}
         >
             <Router>

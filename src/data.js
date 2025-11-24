@@ -6,10 +6,11 @@ export const API_PATHS = {
     login: API_BASENAME + "/login",
     logout: API_BASENAME + "/logout",
     user: API_BASENAME + "/user",
+    delete_user: API_BASENAME + '/user',
 
     create_ad: API_BASENAME + "/ads/create",
     get_ads: API_BASENAME + "/ads",
-    get_my_ads: API_BASENAME + "/todo",
+    get_my_ads: API_BASENAME + "/ads/my",
 
     change_name: API_BASENAME + "/user/name",
     change_phone: API_BASENAME + "/user/phone",

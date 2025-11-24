@@ -7,8 +7,17 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import AdsContainer from "../components/AdsContainer";
 
-import { API_PATHS, DEBUG } from "../data";
-import { RestartAnim } from "../functions";
+import {
+    ApiChangeEmail,
+    ApiChangeName,
+    ApiChangePassword,
+    ApiChangePhone,
+    ApiGetMyAds,
+    ApiGetUser,
+    ApiLogOutUser,
+    ApiDeleteUser,
+} from "../apiRequests";
+import { useNavigate } from "react-router-dom";
 
 export default function ProfilePage() {
     const _name = window.localStorage.getItem("user_name"),
@@ -24,40 +33,30 @@ export default function ProfilePage() {
         GetUser();
     }, []);
 
-    const { setAlert, alertRef } = useContext(AppContext);
+    const { CallAlert, setSignedIn } = useContext(AppContext);
 
     async function GetUser() {
-        try {
-            const response = await fetch(API_PATHS.user, {
-                method: "GET",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-            });
+        const data = await ApiGetUser();
 
-            const data = await response.json();
-            if (DEBUG) console.debug("Getting user. Data received:", data);
-
-            if (data.user) {
-                if (data.user.name != userName) {
-                    window.localStorage.setItem("user_name", data.user.name);
-                    setUserName(data.user.name);
-                }
-                if (data.user.date != userDate) {
-                    window.localStorage.setItem("user_date", data.user.date);
-                    setUserDate(data.user.date);
-                }
-                if (data.user.email != userEmail) {
-                    window.localStorage.setItem("user_email", data.user.email);
-                    setUserEmail(data.user.email);
-                }
-                if (data.user.phone != userPhone) {
-                    window.localStorage.setItem("user_phone", data.user.phone);
-                    setUserPhone(data.user.phone);
-                }
+        if (data.user) {
+            if (data.user.name != userName) {
+                window.localStorage.setItem("user_name", data.user.name);
+                setUserName(data.user.name);
             }
-        } catch (error) {
-            console.error("Getting user. Error occured:", error);
-        }
+            if (data.user.date != userDate) {
+                window.localStorage.setItem("user_date", data.user.date);
+                setUserDate(data.user.date);
+            }
+            if (data.user.email != userEmail) {
+                window.localStorage.setItem("user_email", data.user.email);
+                setUserEmail(data.user.email);
+            }
+            if (data.user.phone != userPhone) {
+                window.localStorage.setItem("user_phone", data.user.phone);
+                setUserPhone(data.user.phone);
+            }
+        } else if (data.error)
+            CallAlert("Ошибка при обновлении профиля", "red");
     }
 
     return (
@@ -76,10 +75,10 @@ export default function ProfilePage() {
                     email={userEmail}
                     phone={userPhone}
                     setPhone={setUserPhone}
-                    setAlert={setAlert}
-                    alertRef={alertRef}
+                    CallAlert={CallAlert}
+                    setSignedIn={setSignedIn}
                 />
-                <PostedPetsCard setAlert={setAlert} alertRef={alertRef} />
+                <PostedPetsCard CallAlert={CallAlert} />
                 <SettingsCard />
             </div>
             <Footer />
@@ -122,8 +121,8 @@ function AccountCard({
     email,
     phone,
     setPhone,
-    setAlert,
-    alertRef,
+    CallAlert,
+    setSignedIn,
 }) {
     return (
         <section id="account-card-section" className="card-section">
@@ -131,26 +130,30 @@ function AccountCard({
             <AccountNameField
                 _name={name}
                 setUserName={setName}
-                setAlert={setAlert}
-                alertRef={alertRef}
+                CallAlert={CallAlert}
             />
             <AccountPhoneField
                 _phone={phone}
                 setUserPhone={setPhone}
-                setAlert={setAlert}
-                alertRef={alertRef}
+                CallAlert={CallAlert}
             />
-            <AccountEmailField
-                _email={email}
-                setAlert={setAlert}
-                alertRef={alertRef}
-            />
-            <AccountPasswordField setAlert={setAlert} alertRef={alertRef} />
+            <AccountEmailField _email={email} CallAlert={CallAlert} />
+            <AccountPasswordField CallAlert={CallAlert} />
+            <div style={{ display: "flex", gap: "2rem", position: "relative" }}>
+                <AccountLogOut
+                    CallAlert={CallAlert}
+                    setSignedIn={setSignedIn}
+                />
+                <AccountDelete
+                    CallAlert={CallAlert}
+                    setSignedIn={setSignedIn}
+                />
+            </div>
         </section>
     );
 }
 
-function AccountNameField({ _name, setUserName, setAlert, alertRef }) {
+function AccountNameField({ _name, setUserName, CallAlert }) {
     const editButtonRef = useRef();
 
     const [disabled, setDisabled] = useState(true);
@@ -160,34 +163,13 @@ function AccountNameField({ _name, setUserName, setAlert, alertRef }) {
     }, [_name]);
 
     async function ChangeName() {
-        try {
-            const response = await fetch(API_PATHS.change_name, {
-                method: "PUT",
-                credentials: "include",
-                body: JSON.stringify({ name }),
-                headers: { "Content-Type": "application/json" },
-            });
+        const data = await ApiChangeName(name);
 
-            const data = await response.json();
-            if (DEBUG) console.debug("Changing name. Data received:", data);
-
-            RestartAnim(alertRef.current);
-            if (data.success) {
-                setAlert({ text: "Имя успешно изменено", color: "green" });
-                setUserName(name);
-            } else
-                setAlert({
-                    text: "Ошибка при изменении имени. Попробуйте позже",
-                    color: "red",
-                });
-        } catch (error) {
-            console.error("Changing name. Error occured:", error);
-            RestartAnim(alertRef.current);
-            setAlert({
-                text: "Ошибка при изменении имени. Что-то пошло не так",
-                color: "red",
-            });
-        }
+        if (data.success) {
+            CallAlert("Имя успешно изменено", "green");
+            setUserName(name);
+        } else if (data.error)
+            CallAlert("Ошибка при изменении имени. Попробуйте позже", "red");
     }
 
     const handleClickEditButton = () => {
@@ -196,14 +178,9 @@ function AccountNameField({ _name, setUserName, setAlert, alertRef }) {
         } else {
             editButtonRef.current.classList.add("disabled");
             if (name == "" || name == _name) {
-                RestartAnim(alertRef.current);
-                if (name == "")
-                    setAlert({ text: "Имя слишком короткое", color: "red" });
+                if (name == "") CallAlert("Имя слишком короткое", "red");
                 else if (name == _name)
-                    setAlert({
-                        text: "Текущее имя совпадает с новым",
-                        color: 'red',
-                    });
+                    CallAlert("Текущее имя совпадает с новым", "red");
                 setName(_name);
             } else ChangeName();
         }
@@ -234,7 +211,7 @@ function AccountNameField({ _name, setUserName, setAlert, alertRef }) {
     );
 }
 
-function AccountPhoneField({ _phone, setUserPhone, setAlert, alertRef }) {
+function AccountPhoneField({ _phone, setUserPhone, CallAlert }) {
     const editButtonRef = useRef();
 
     const [disabled, setDisabled] = useState(true);
@@ -244,34 +221,13 @@ function AccountPhoneField({ _phone, setUserPhone, setAlert, alertRef }) {
     }, [_phone]);
 
     async function ChangePhone() {
-        try {
-            const response = await fetch(API_PATHS.change_phone, {
-                method: "PUT",
-                credentials: "include",
-                body: JSON.stringify({ phone }),
-                headers: { "Content-Type": "application/json" },
-            });
+        const data = await ApiChangePhone(phone);
 
-            const data = await response.json();
-            if (DEBUG) console.debug("Changing phone. Data received:", data);
-
-            RestartAnim(alertRef.current);
-            if (data.success) {
-                setAlert({ text: "Телефон успешно изменен", color: "green" });
-                setUserPhone(phone);
-            } else
-                setAlert({
-                    text: "Ошибка при изменении телефона. Попробуйте позже",
-                    color: "red",
-                });
-        } catch (error) {
-            console.error("Changing phone. Error occured:", error);
-            RestartAnim(alertRef.current);
-            setAlert({
-                text: "Ошибка при изменении телефона. Что-то пошло не так",
-                color: "red",
-            });
-        }
+        if (data.success) {
+            CallAlert("Телефон успешно изменен", "green");
+            setUserPhone(phone);
+        } else if (data.error)
+            CallAlert("Ошибка при изменении телефона. Попробуйте позже", "red");
     }
 
     const handleClickEditButton = () => {
@@ -284,19 +240,11 @@ function AccountPhoneField({ _phone, setUserPhone, setAlert, alertRef }) {
                 !phone.startsWith("+7") ||
                 phone == _phone
             ) {
-                RestartAnim(alertRef.current);
                 if (phone.length != 12 || !phone.startsWith("+7"))
-                    setAlert({
-                        text: "Неверный формат телефона",
-                        color: "red",
-                    });
+                    CallAlert("Неверный формат телефона", "red");
                 else if (phone == _phone)
-                    setAlert({
-                        text: "Текущий телефон совпадает с новым",
-                        color: "red",
-                    });
+                    CallAlert("Текущий телефон совпадает с новым", "red");
                 setPhone(_phone);
-                setAlert({ text: "Неверный формат телефона", color: "red" });
             } else ChangePhone();
         }
         setDisabled((prev) => !prev);
@@ -326,7 +274,7 @@ function AccountPhoneField({ _phone, setUserPhone, setAlert, alertRef }) {
     );
 }
 
-function AccountEmailField({ _email, setAlert, alertRef }) {
+function AccountEmailField({ _email, CallAlert }) {
     const editButtonRef = useRef();
 
     const [disabled, setDisabled] = useState(true);
@@ -338,39 +286,21 @@ function AccountEmailField({ _email, setAlert, alertRef }) {
     const { setSignedIn } = useContext(AppContext);
 
     async function ChangeEmail() {
-        try {
-            const response = await fetch(API_PATHS.change_email, {
-                method: "PUT",
-                credentials: "include",
-                body: JSON.stringify({ email }),
-                headers: { "Content-Type": "application/json" },
-            });
+        const data = await ApiChangeEmail(email);
 
-            const data = await response.json();
-            if (DEBUG) console.debug("Changing email. Data received:", data);
-
-            // TODO: verification
-            RestartAnim(alertRef.current);
-            if (data.success) {
-                setSignedIn(false);
-                window.localStorage.removeItem("user_name");
-                window.localStorage.removeItem("user_date");
-                window.localStorage.removeItem("user_email");
-                window.localStorage.removeItem("user_phone");
-                window.location.pathname = "/";
-            } else
-                setAlert({
-                    text: "Ошибка при изменении почты. Попробуйте позже",
-                    color: "red",
-                });
-        } catch (error) {
-            console.error("Changing email. Error occured:", error);
-            RestartAnim(alertRef.current);
-            setAlert({
-                text: "Ошибка при изменении почты. Что-то пошло не так",
-                color: "red",
-            });
-        }
+        if (data.success) {
+            setSignedIn(false);
+            CallAlert(
+                "Письмо с подтверждением отправлено на новую почту",
+                "green"
+            );
+            window.localStorage.removeItem("user_name");
+            window.localStorage.removeItem("user_date");
+            window.localStorage.removeItem("user_email");
+            window.localStorage.removeItem("user_phone");
+            window.location.pathname = "/";
+        } else if (data.error)
+            CallAlert("Ошибка при изменении почты. Попробуйте позже", "red");
     }
 
     const handleClickEditButton = () => {
@@ -379,11 +309,10 @@ function AccountEmailField({ _email, setAlert, alertRef }) {
         } else {
             editButtonRef.current.classList.add("disabled");
             if (email == "" || !email.includes("@") || email == _email) {
-                RestartAnim(alertRef.current);
                 if (email == "" || !email.includes("@"))
-                    setAlert({ text: "Неверный формат почты", color: "red" });
+                    CallAlert("Неверный формат почты", "red");
                 else if (email == _email)
-                    setAlert({ text: "Текущая почта совпадает с новой", color: 'red' });
+                    CallAlert("Текущая почты совпадает с новой", "red");
                 setEmail(_email);
             } else ChangeEmail();
         }
@@ -414,7 +343,7 @@ function AccountEmailField({ _email, setAlert, alertRef }) {
     );
 }
 
-function AccountPasswordField({ setAlert, alertRef }) {
+function AccountPasswordField({ CallAlert }) {
     const editButtonRef = useRef();
 
     const [disabled, setDisabled] = useState(true);
@@ -423,29 +352,12 @@ function AccountPasswordField({ setAlert, alertRef }) {
     const [newPassword, setNewPassword] = useState("");
 
     async function ChangePassword() {
-        try {
-            const response = await fetch(API_PATHS.change_password, {
-                method: "PUT",
-                credentials: "include",
-                body: JSON.stringify({ curPassword, newPassword }),
-                headers: { "Content-Type": "application/json" },
-            });
+        const data = await ApiChangePassword(curPassword, newPassword);
 
-            const data = await response.json();
-            if (DEBUG) console.debug("Changing password. Data received:", data);
-
-            RestartAnim(alertRef.current);
-            if (data.success)
-                setAlert({ text: "Пароль успешно изменен", color: "green" });
-            else setAlert({ text: "Неверный пароль", color: "red" });
-        } catch (error) {
-            console.error("Changing password. Error occured:", error);
-            RestartAnim(alertRef.current);
-            setAlert({
-                text: "Ошибка при изменении пароля. Что-то пошло не так",
-                color: "red",
-            });
-        }
+        if (data.success) CallAlert("Пароль успешно изменен", "green");
+        else if (data.error)
+            CallAlert("Ошибка при изменении пароля. Попробуйте позже", "red");
+        else CallAlert("Неверный пароль", "red");
     }
 
     const handleClickEditButton = () => {
@@ -458,17 +370,10 @@ function AccountPasswordField({ setAlert, alertRef }) {
                 newPassword.length < 8 ||
                 curPassword == newPassword
             ) {
-                RestartAnim(alertRef.current);
                 if (curPassword.length < 8 || newPassword.length < 8)
-                    setAlert({
-                        text: "Минимальная длина пароля - 8 символов",
-                        color: "red",
-                    });
+                    CallAlert("Минимальная длина пароля - 8 символов", "red");
                 else if (curPassword == newPassword)
-                    setAlert({
-                        text: "Текущий и новый пароль совпадают",
-                        color: "red",
-                    });
+                    CallAlert("Текущий и новый пароль совпадают", "red");
                 setCurPassword("");
                 setNewPassword("");
             } else ChangePassword();
@@ -514,39 +419,89 @@ function AccountPasswordField({ setAlert, alertRef }) {
     );
 }
 
-function PostedPetsCard({ setAlert, alertRef }) {
+function AccountLogOut({ CallAlert, setSignedIn }) {
+    const navigate = useNavigate();
+
+    async function LogOut() {
+        const data = await ApiLogOutUser();
+
+        if (data.success) {
+            CallAlert("Успешный выход из аккаунта", "green");
+            setSignedIn(false);
+            window.localStorage.removeItem("user_name");
+            window.localStorage.removeItem("user_email");
+            window.localStorage.removeItem("user_date");
+            window.localStorage.removeItem("user_phone");
+            navigate("/");
+        } else if (data.error)
+            CallAlert(
+                "Ошибка при попытке выхода из аккаунта. Попробуйте позже",
+                "red"
+            );
+    }
+
+    return (
+        <div className="account-field" style={{ flexGrow: 1 }}>
+            <h6>Выход</h6>
+            <div style={{ position: "relative" }}>
+                <button
+                    className="primary-button red left-img"
+                    style={{ width: "100%" }}
+                    onClick={() => LogOut()}
+                >
+                    <img src="/icons/log_out.svg" />
+                    Выйти из аккаунта
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function AccountDelete({ CallAlert, setSignedIn }) {
+    const navigate = useNavigate();
+
+    async function DeleteAccount() {
+        const data = await ApiDeleteUser();
+
+        if (data.success) {
+            CallAlert("Аккаунт успешно удален", "green");
+            setSignedIn(false);
+            navigate("/");
+        } else if (data.error) CallAlert("Ошибка при удалении аккаунта", "red");
+    }
+
+    return (
+        <div className="account-field" style={{ flexGrow: 1 }}>
+            <h6>Удалить</h6>
+            <div style={{ position: "relative" }}>
+                <button
+                    className="primary-button bright-red left-img"
+                    style={{ width: "100%" }}
+                    onClick={() => DeleteAccount()}
+                >
+                    <img src="/icons/log_out.svg" />
+                    Удалить аккаунт
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function PostedPetsCard({ CallAlert }) {
     const [myAds, setMyAds] = useState([]);
     useEffect(() => {
         GetMyAds();
     }, []);
 
     async function GetMyAds() {
-        try {
-            const response = await fetch(API_PATHS.get_my_ads, {
-                method: "GET",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-            });
+        const data = await ApiGetMyAds();
 
-            const data = await response.json();
-            if (DEBUG) console.debug("Getting my ads. Data received:", data);
-
-            if (data.success) setMyAds(data.ads);
-            else {
-                RestartAnim(alertRef.current);
-                setAlert({
-                    text: "Ошибка при получении ваших объявлений. Попробуйте позже",
-                    color: "red",
-                });
-            }
-        } catch (error) {
-            console.error("Getting my ads. Error occured:", error);
-            RestartAnim(alertRef.current);
-            setAlert({
-                text: "Ошибка при получении ваших объявлений. Что-то пошло не так",
-                color: "red",
-            });
-        }
+        if (data.success) setMyAds(data.ads);
+        else if (data.error)
+            CallAlert(
+                "Ошибка при получении ваших объявлений. Попробуйте позже",
+                "red"
+            );
     }
 
     return (

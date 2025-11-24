@@ -10,17 +10,21 @@ import Footer from "../components/Footer";
 import DropdownLabeled from "../components/DropdownLabeled";
 import InputLabeled from "../components/InputLabeled";
 
-import { API_PATHS, CREATE_AD_STAGES, DEBUG } from "../data";
+import { CREATE_AD_STAGES, DEBUG } from "../data";
 import {
+    ymapsInitPromise,
     YMap,
     YMapDefaultSchemeLayer,
     YMapDefaultFeaturesLayer,
     YMapMarker,
     YMapListener,
 } from "../ymaps";
-import { RestartAnim } from "../functions";
+import { ApiCreateAd } from "../apiRequests";
+import { useNavigate } from "react-router-dom";
 
 export default function CreateAdPage() {
+    const navigate = useNavigate();
+
     const [activeStage, setActiveStage] = useState(0);
 
     const validateFieldsFunc = useRef(() => {});
@@ -43,7 +47,7 @@ export default function CreateAdPage() {
         extras: "", // extra information from creator (unneccessary)
     });
 
-    const { setAlert, alertRef } = useContext(AppContext);
+    const { CallAlert } = useContext(AppContext);
 
     const ProcessNavigationButtonClick = async (delta) => {
         if (delta == -1) {
@@ -52,40 +56,32 @@ export default function CreateAdPage() {
         }
 
         if (!validateFieldsFunc.current()) {
-            RestartAnim(alertRef.current);
-            setAlert({ text: "Заполните обязательные поля", color: "red" });
+            CallAlert("Заполните обязательные поля", "red");
             return;
         }
 
         await applyFieldsFunc.current();
-        
+
         if (activeStage != 3) setActiveStage((prev) => prev + 1);
-        else CreateAd();
+        else {
+            console.log(adDetails.current);
+            CreateAd();
+        }
     };
 
     async function CreateAd() {
-        try {
-            const response = await fetch(API_PATHS.create_ad, {
-                method: "POST",
-                credentials: "include",
-                body: JSON.stringify(adDetails.current),
-                headers: { "Content-Type": "application/json" },
-            });
+        const data = await ApiCreateAd(adDetails.current);
 
-            const data = await response.json();
-            if (DEBUG) console.debug("Creating ad. Data received:", data);
-
-            RestartAnim(alertRef.current);
-            if (data.success)
-                setAlert({
-                    text: "Объявление успешно создано",
-                    color: "green",
-                });
-            else setAlert({ text: "Попробуйте позже", color: "red" });
-        } catch (error) {
-            console.error("Creating ad. Error occured:", error);
-            setAlert({ text: "Что-то пошло не так", color: "red" });
-        }
+        if (data.success) {
+            CallAlert("Объявление успешно создано", "green");
+            navigate("/");
+        } else if (data.message == "Неверный формат времени")
+            CallAlert("Время указано в неверном формате", "red");
+        else if (data.error)
+            CallAlert(
+                "Ошибка при создании объявления. Попробуйте позже",
+                "red"
+            );
     }
 
     return (
@@ -402,9 +398,9 @@ function LocationFields({ validate, apply, adDetails }) {
 
             try {
                 const geoLocation =
-                    data.response.GeoObjectCollection.featureMember[0].GeoObject.Point.pos.split(
-                        " "
-                    );
+                    data.response.GeoObjectCollection.featureMember[0].GeoObject.Point.pos
+                        .split(" ")
+                        .map((coord) => parseFloat(coord));
 
                 if (DEBUG) {
                     console.debug(
@@ -471,7 +467,7 @@ function LocationFields({ validate, apply, adDetails }) {
 
                 adDetails.current = {
                     ...adDetails.current,
-                    location: '',
+                    location: "",
                     geoLocation: geopoint,
                     time: refs.time.current.value,
                 };
@@ -582,7 +578,8 @@ function InputAddress({ value, ref }) {
             const subtitle = value.subtitle?.text;
 
             let suggestText = subtitle ? subtitle : title;
-            if (subtitle && title.length > subtitle.length) suggestText += `, ${title}`;
+            if (subtitle && title.length > subtitle.length)
+                suggestText += `, ${title}`;
 
             const suggestStyle = {
                 borderTopLeftRadius: index == 0 ? "1rem" : 0,
@@ -625,10 +622,13 @@ function InputAddress({ value, ref }) {
 }
 
 function InputMap({ geopoint, setGeopoint, ref }) {
+    const [mapLoaded, setMapLoaded] = useState(false);
     const [mapLocation, setMapLocation] = useState(
-        geopoint ? geopoint : [37.617644, 55.755819]
+        geopoint.length != 0 ? geopoint : [37.617644, 55.755819]
     );
     const [mapZoom, setMapZoom] = useState(9);
+
+    ymapsInitPromise.then(() => setMapLoaded(true));
 
     const handleClickMap = (e) => {
         if (!e?.entity) return;
@@ -640,19 +640,21 @@ function InputMap({ geopoint, setGeopoint, ref }) {
 
     return (
         <div id="create-ad-map" ref={ref}>
-            <YMap
-                location={{ center: mapLocation, zoom: mapZoom }}
-                style={{ width: "100%", height: "100%" }}
-            >
-                <YMapDefaultSchemeLayer />
-                <YMapDefaultFeaturesLayer />
-                {geopoint && (
-                    <YMapMarker coordinates={geopoint}>
-                        <div className="map-marker" />
-                    </YMapMarker>
-                )}
-                <YMapListener onClick={handleClickMap} />
-            </YMap>
+            {mapLoaded && (
+                <YMap
+                    location={{ center: mapLocation, zoom: mapZoom }}
+                    style={{ width: "100%", height: "100%" }}
+                >
+                    <YMapDefaultSchemeLayer />
+                    <YMapDefaultFeaturesLayer />
+                    {geopoint && (
+                        <YMapMarker coordinates={geopoint}>
+                            <div className="map-marker" />
+                        </YMapMarker>
+                    )}
+                    <YMapListener onClick={handleClickMap} />
+                </YMap>
+            )}
         </div>
     );
 }

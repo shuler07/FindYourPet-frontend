@@ -6,8 +6,8 @@ import { AppContext } from "../App";
 
 import InputLabeled from "../components/InputLabeled";
 
-import { API_PATHS, DEBUG } from "../data";
 import { RestartAnim } from "../functions";
+import { ApiLoginUser, ApiRegisterUser } from "../apiRequests";
 
 export default function SigninPage() {
     const [isRegister, setIsRegister] = useState(false);
@@ -22,7 +22,7 @@ export default function SigninPage() {
 
     const navigate = useNavigate();
 
-    const { setSignedIn, alertRef, setAlert } = useContext(AppContext);
+    const { setSignedIn, CallAlert } = useContext(AppContext);
 
     const credsValid = (email, password, confirm_password) => {
         let flag = true;
@@ -30,33 +30,23 @@ export default function SigninPage() {
         if (email == "" || !email.includes("@")) {
             flag = false;
             emailInputRef.current.classList.add("wrong-field");
-            RestartAnim(alertRef.current);
-            setAlert({ text: "Неверный формат почты", color: "red" });
+            CallAlert("Неверный формат почты", "red");
         } else emailInputRef.current.classList.remove("wrong-field");
+
         if (password.length < 8) {
             flag = false;
             passwordInputRef.current.classList.add("wrong-field");
-            RestartAnim(alertRef.current);
-            setAlert({
-                text: "Минимальная длина пароля - 8 символов",
-                color: "red",
-            });
+            CallAlert("Минимальная длина пароля - 8 символов", "red");
         } else passwordInputRef.current.classList.remove("wrong-field");
+
         if (confirm_password != null) {
             if (confirm_password.length < 8 || password != confirm_password) {
                 flag = false;
                 confirmPasswordRef.current.classList.add("wrong-field");
-                RestartAnim(alertRef.current);
                 if (confirm_password.length < 8)
-                    setAlert({
-                        text: "Минимальная длина пароля - 8 символов",
-                        color: "red",
-                    });
+                    CallAlert("Минимальная длина пароля - 8 символов", "red");
                 else if (password != confirm_password)
-                    setAlert({
-                        text: "Пароли не совпадают",
-                        color: "red",
-                    });
+                    CallAlert("Пароли не совпадают", "red");
             } else confirmPasswordRef.current.classList.remove("wrong-field");
         }
 
@@ -74,30 +64,22 @@ export default function SigninPage() {
 
         if (!credsValid(email, password, confirm_password)) return;
 
-        try {
-            const response = await fetch(API_PATHS.register, {
-                method: "POST",
-                credentials: "include",
-                body: JSON.stringify({ email, password, confirm_password }),
-                headers: { "Content-Type": "application/json" },
-            });
+        const data = await ApiRegisterUser(email, password, confirm_password);
 
-            const data = await response.json();
-            if (DEBUG) console.debug("Registering. Data received:", data);
-
-            RestartAnim(alertRef.current);
-            if (data.success)
-                setAlert({ text: "Успешная регистрация", color: "green" });
-            else {
-                if (data.detail == "Email уже зарегистрирован")
-                    setAlert({
-                        text: "Пользователь с такой почтой уже зарегистрирован",
-                        color: "red",
-                    });
-                else setAlert({ text: "Неверный формат почты", color: "red" });
-            }
-        } catch (error) {
-            console.error("Registering. Error occured:", error);
+        if (data.success)
+            CallAlert(
+                "Письмо с подтверждением отправлено на вашу почту",
+                "green"
+            );
+        else {
+            if (data.detail == "Email уже зарегистрирован")
+                CallAlert(
+                    "Пользователь с такой почтой уже зарегистрирован",
+                    "red"
+                );
+            else if (data.error)
+                CallAlert("Ошибка при регистрации. Попробуйте позже", "red");
+            else CallAlert("Неверный формат почты", "red");
         }
     }
 
@@ -107,31 +89,17 @@ export default function SigninPage() {
 
         if (!credsValid(email, password, null)) return;
 
-        try {
-            const response = await fetch(API_PATHS.login, {
-                method: "POST",
-                credentials: "include",
-                body: JSON.stringify({ email, password }),
-                headers: { "Content-Type": "application/json" },
-            });
+        const data = await ApiLoginUser(email, password);
 
-            const data = await response.json();
-            if (DEBUG) console.debug("Logining. Data received:", data);
-
-            RestartAnim(alertRef.current);
-            if (data.success) {
-                setAlert({ text: "Успешный вход", color: "green" });
-                setSignedIn(true);
-                navigate("/");
-            } else {
-                if (data.detail == "Неверный email или пароль")
-                    setAlert({
-                        text: "Неверная почта или пароль",
-                        color: "red",
-                    });
-            }
-        } catch (error) {
-            console.error("Logining. Error occured:", error);
+        if (data.success) {
+            CallAlert("Успешный вход", "green");
+            setSignedIn(true);
+            navigate("/");
+        } else {
+            if (data.detail == "Неверный email или пароль")
+                CallAlert("Неверная почта или пароль", "red");
+            else if (data.error)
+                CallAlert("Ошибка при входе. Попробуйте позже", "red");
         }
     }
 

@@ -65,7 +65,7 @@ export default function MainPage() {
                         </div>
                     </div>
                     <div className="about-block">
-                        <img src="/icons/search.svg" />
+                        <img src="/icons/search-blue.svg" />
                         <div>
                             <h6>Активных объявлений</h6>
                             <h3>{activeAds}</h3>
