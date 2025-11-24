@@ -43,9 +43,9 @@ export default function CreateAdPage() {
         location: "", // place in words
         geoLocation: [], // place in coords
         time: "", // time in dd.MM.yyyy hh:mm:ss
-        contactName: "", // contact name of creator
-        contactPhone: "", // contact phone of creator
-        contactEmail: "", // contact email of creator
+        contactName: window.localStorage.getItem('user_name'), // contact name of creator
+        contactPhone: window.localStorage.getItem('user_phone'), // contact phone of creator
+        contactEmail: window.localStorage.getItem('user_email'), // contact email of creator
         extras: "", // extra information from creator (unneccessary)
     });
 
@@ -637,6 +637,8 @@ function ContactFields({ validate, apply, adDetails }) {
         };
     };
 
+    const phoneField = adDetails.current.contactPhone ? adDetails.current.contactPhone : '';
+
     return (
         <div id="fields-container">
             <InputLabeled
@@ -651,11 +653,11 @@ function ContactFields({ validate, apply, adDetails }) {
             <InputLabeled
                 inputId="PetContactPhone"
                 type="tel"
-                placeholder="+7(___)___-__-__"
+                placeholder="+7 (___) ___-__-__"
                 autoComplete="tel"
                 label="Ваш телефон *"
                 ref={refs.contactPhone}
-                value={adDetails.current.contactPhone}
+                value={phoneField}
             />
             <InputLabeled
                 inputId="PetContactEmail"

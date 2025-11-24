@@ -168,6 +168,7 @@ function AccountNameField({ _name, setUserName, CallAlert }) {
         if (data.success) {
             CallAlert("Имя успешно изменено", "green");
             setUserName(name);
+            window.localStorage.setItem("user_name", name);
         } else if (data.error)
             CallAlert("Ошибка при изменении имени. Попробуйте позже", "red");
     }
@@ -226,6 +227,7 @@ function AccountPhoneField({ _phone, setUserPhone, CallAlert }) {
         if (data.success) {
             CallAlert("Телефон успешно изменен", "green");
             setUserPhone(phone);
+            window.localStorage.setItem("user_phone", phone);
         } else if (data.error)
             CallAlert("Ошибка при изменении телефона. Попробуйте позже", "red");
     }
