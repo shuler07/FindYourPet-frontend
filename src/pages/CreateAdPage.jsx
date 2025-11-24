@@ -49,6 +49,9 @@ export default function CreateAdPage() {
 
     const { CallAlert } = useContext(AppContext);
 
+    const [navigationButtonsDisabled, setNavigationButtonsDisabled] =
+        useState(false);
+
     const ProcessNavigationButtonClick = async (delta) => {
         if (delta == -1) {
             setActiveStage((prev) => prev - 1);
@@ -60,17 +63,20 @@ export default function CreateAdPage() {
             return;
         }
 
+        setNavigationButtonsDisabled(true);
         await applyFieldsFunc.current();
+        setNavigationButtonsDisabled(false);
 
         if (activeStage != 3) setActiveStage((prev) => prev + 1);
-        else {
-            console.log(adDetails.current);
-            CreateAd();
-        }
+        else CreateAd();
     };
 
     async function CreateAd() {
+        setNavigationButtonsDisabled(true);
+
         const data = await ApiCreateAd(adDetails.current);
+
+        setNavigationButtonsDisabled(false);
 
         if (data.success) {
             CallAlert("Объявление успешно создано", "green");
@@ -99,10 +105,9 @@ export default function CreateAdPage() {
                     />
                     <StageNavigationContainer
                         backDisabled={activeStage == 0}
-                        lastRenamed={activeStage == 3}
-                        processNavigationButtonClick={
-                            ProcessNavigationButtonClick
-                        }
+                        last={activeStage == 3}
+                        event={ProcessNavigationButtonClick}
+                        disabled={navigationButtonsDisabled}
                     />
                 </div>
             </div>
@@ -735,18 +740,21 @@ function ContactFields({ validate, apply, adDetails }) {
     );
 }
 
-function StageNavigationContainer({
-    backDisabled,
-    lastRenamed,
-    processNavigationButtonClick,
-}) {
+function StageNavigationContainer({ backDisabled, last, event, disabled }) {
+    const nextButtonText = disabled
+        ? "Ожидайте..."
+        : last
+        ? "Создать"
+        : "Далее";
+    const nextButtonIcon = last ? "/icons/plus.svg" : "/icons/right-arrow.svg";
+
     return (
         <div id="stage-navigation-container">
             <button
                 id="prev-stage-button"
                 className="primary-button left-img"
-                disabled={backDisabled}
-                onClick={() => processNavigationButtonClick(-1)}
+                disabled={backDisabled || disabled}
+                onClick={() => event(-1)}
             >
                 <img src="/icons/left-arrow.svg" />
                 Назад
@@ -754,16 +762,11 @@ function StageNavigationContainer({
             <button
                 id="next-stage-button"
                 className="primary-button right-img"
-                onClick={() => processNavigationButtonClick(1)}
+                disabled={disabled}
+                onClick={() => event(1)}
             >
-                {lastRenamed ? "Создать" : "Далее"}
-                <img
-                    src={
-                        lastRenamed
-                            ? "/icons/plus.svg"
-                            : "/icons/right-arrow.svg"
-                    }
-                />
+                {nextButtonText}
+                <img src={nextButtonIcon} />
             </button>
         </div>
     );

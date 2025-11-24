@@ -50,6 +50,7 @@ export default function SearchAdsPage() {
     });
 
     // Sidebar
+    const [searchButtonDisabled, setSearchButtonDisabled] = useState(false);
     const [placeSection, setPlaceSection] = useState("region");
     const [mobileView, setMobileView] = useState(window.innerWidth <= 768);
 
@@ -69,6 +70,8 @@ export default function SearchAdsPage() {
     const [geolocOpened, setGeolocOpened] = useState(false);
 
     async function GetAds() {
+        setSearchButtonDisabled(true);
+
         const filters = Object.fromEntries(
             Object.entries(activeFilters).filter(
                 ([k, v]) => v != "any" && !["geoloc", "radius"].includes(k)
@@ -82,6 +85,8 @@ export default function SearchAdsPage() {
         }
 
         const data = await ApiGetAds(filters);
+
+        setSearchButtonDisabled(false);
 
         if (data.success) setAds(data.ads);
         else if (data.error)
@@ -145,6 +150,7 @@ export default function SearchAdsPage() {
                     setGeolocOpened={setGeolocOpened}
                     placeSection={placeSection}
                     setPlaceSection={setPlaceSection}
+                    disabled={searchButtonDisabled}
                 />
                 <MainContainer
                     searchText={searchText}
@@ -174,6 +180,7 @@ function SideBar({
     setGeolocOpened,
     placeSection,
     setPlaceSection,
+    disabled,
 }) {
     const showElems = () => {
         return Object.entries(activeFilters).map((value, index) => {
@@ -193,6 +200,12 @@ function SideBar({
     const handleChangeRadius = (e) => {
         setActiveFilters((prev) => ({ ...prev, radius: e.target.value }));
     };
+
+    const isSearchDisabled =
+        (placeSection == "place" &&
+            (!activeFilters.geoloc || activeFilters.radius < 1)) ||
+        disabled;
+    const searchText = disabled ? "Ожидайте..." : "Поиск";
 
     return (
         <div
@@ -259,15 +272,12 @@ function SideBar({
                 </>
             )}
             <button
-                disabled={
-                    placeSection == "place" &&
-                    (!activeFilters.geoloc || activeFilters.radius < 1)
-                }
+                disabled={isSearchDisabled}
                 className="primary-button left-img"
                 onClick={getAds}
             >
                 <img src="/icons/search.svg" />
-                Поиск
+                {searchText}
             </button>
         </div>
     );

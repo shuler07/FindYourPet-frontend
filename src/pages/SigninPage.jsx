@@ -24,6 +24,8 @@ export default function SigninPage() {
 
     const { setSignedIn, CallAlert } = useContext(AppContext);
 
+    const [authButtonDisabled, setAuthButtonDisabled] = useState(false);
+
     const credsValid = (email, password, confirm_password) => {
         let flag = true;
 
@@ -50,10 +52,13 @@ export default function SigninPage() {
             } else confirmPasswordRef.current.classList.remove("wrong-field");
         }
 
+        if (!flag) setAuthButtonDisabled(false);
+
         return flag;
     };
 
     const authenticateUser = () => {
+        setAuthButtonDisabled(true);
         isRegister ? RegisterUser() : LoginUser();
     };
 
@@ -65,6 +70,8 @@ export default function SigninPage() {
         if (!credsValid(email, password, confirm_password)) return;
 
         const data = await ApiRegisterUser(email, password, confirm_password);
+
+        setAuthButtonDisabled(false);
 
         if (data.success)
             CallAlert(
@@ -90,6 +97,8 @@ export default function SigninPage() {
         if (!credsValid(email, password, null)) return;
 
         const data = await ApiLoginUser(email, password);
+
+        setAuthButtonDisabled(false);
 
         if (data.success) {
             CallAlert("Успешный вход", "green");
@@ -171,6 +180,7 @@ export default function SigninPage() {
                     <AuthButton
                         isRegister={isRegister}
                         event={authenticateUser}
+                        disabled={authButtonDisabled}
                     />
                     {!isRegister && <ForgetPasswordButton />}
                 </div>
@@ -221,15 +231,22 @@ function RightFormToogleContainer({ isRegister, setIsRegister }) {
     );
 }
 
-function AuthButton({ isRegister, event }) {
+function AuthButton({ isRegister, event, disabled }) {
+    const text = disabled
+        ? "Ожидайте..."
+        : isRegister
+        ? "Зарегистрироваться"
+        : "Войти";
+
     return (
         <button
             id="auth-button"
             className="primary-button right-img"
             type="button"
+            disabled={disabled}
             onClick={event}
         >
-            {isRegister ? "Зарегистрироваться" : "Войти"}
+            {text}
             <img src="/icons/right-arrow.svg" />
         </button>
     );
