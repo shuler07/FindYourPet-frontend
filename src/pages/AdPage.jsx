@@ -16,24 +16,7 @@ import {
 } from "../ymaps";
 
 export default function AdPage() {
-    // const ad = useContext(AppContext).ad;
-    const ad = {
-        status: "lost", // ONLY lost / found
-        type: "dog", // ONLY dog / cat
-        breed: "metis", // ONLY labrador, german_shepherd, poodle, metis etc
-        color: "Черно-белый", // pet color
-        size: "big", // ONLY little / medium / big
-        distincts: "", // distinctive features (unneccessary)
-        nickname: "Бобик", // pet nickname (unneccessary)
-        danger: "unknown", // ONLY danger / safe / unknown
-        location: "Москва, Константина Царева, д. 12", // place in words
-        geoLocation: [37.501234, 54.234567], // place in coords
-        time: "24.11.2025 12:00", // time in dd.MM.yyyy hh:mm:ss
-        contactName: "Петр", // contact name of creator
-        contactPhone: "+71234567890", // contact phone of creator
-        contactEmail: "vitalisobolevggg@gmail.com", // contact email of creator
-        extras: "Очень сильно напуган", // extra information from creator (unneccessary)
-    };
+    const ad = useContext(AppContext).ad;
 
     const isCreator =
         ad.contactEmail == window.localStorage.getItem("user_email");
@@ -98,6 +81,7 @@ function PetInfo({
 }) {
     const nicknameText = nickname != "" ? nickname : "Кличка неизвестна";
     const distinctsText = distincts != "" ? distincts : "Не указаны";
+    const extrasText = extras != "" ? extras : 'Не указана';
     const styledInfoStatus = {
         backgroundColor: status == "lost" ? "#f53535" : "#1fcf1f",
     };
@@ -139,12 +123,10 @@ function PetInfo({
                     <span style={{ fontWeight: "600" }}>Время:</span> {time}
                 </h6>
             </div>
-            {extras != "" && (
-                <div>
-                    <h3>Дополнительная информация</h3>
-                    <h6>{extras}</h6>
-                </div>
-            )}
+            <div>
+                <h3>Дополнительная информация</h3>
+                <h6>{extrasText}</h6>
+            </div>
             {isCreator ? (
                 <h6>
                     Это созданное вами объьявление. Если оно перестало быть
